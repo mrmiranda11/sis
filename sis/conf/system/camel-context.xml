@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+        This config file contains routes that are
+        compatible with Universal Gateway
+ -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:httpj="http://cxf.apache.org/transports/http-jetty/configuration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/transports/http-jetty/configuration http://cxf.apache.org/schemas/configuration/http-jetty.xsd
+       http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.1.xsd
+       http://activemq.apache.org/camel/schema/spring http://activemq.apache.org/camel/schema/spring/camel-spring.xsd">
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="file:${client.solution.home}/conf/system/applicationContext.xml"/>
+    <import resource="file:${client.solution.home}/conf/system/applicationContext-standalone.xml"/>
+
+    <!-- camel ssl context parameters -->
+    <camel:sslContextParameters id="httpsContextParameters">
+        <camel:keyManagers keyPassword="{{org.eclipse.jetty.ssl.password}}">
+            <camel:keyStore
+                    resource="file:///{{org.eclipse.jetty.ssl.keystore}}"
+                    password="{{org.eclipse.jetty.ssl.keypassword}}"/>
+        </camel:keyManagers>
+        <!-- exclude vulnerable protocols-->
+        <camel:secureSocketProtocolsFilter>
+            <camel:include>.*</camel:include>
+            <camel:exclude>SSLv3</camel:exclude>
+            <camel:exclude>TLSv1</camel:exclude>
+        </camel:secureSocketProtocolsFilter>
+    </camel:sslContextParameters>
+
+    <!--bean to call pvm process -->
+    <camel:camelContext id="camelContext">
+        <camel:endpoint id="tempStoreFolder" uri="file://${temp.storage.path}?delete=true&amp;delay=5000&amp;filter=#serFileFilter"/>
+        <camel:endpoint id="deployWorkFlowEP" uri="file://${client.solution.home}/processflows/input?delay=1000&amp;move=../deployed/${date:now:yyyyMMddHHmmssSSS}-${file:name}&amp;moveFailed=../error/${date:now:yyyyMMddHHmmssSSS}-${file:name}"/>
+        <camel:endpoint id="lookupEP" uri="file://${client.solution.home}/lookup?delay=1000&amp;move=../storage/${file:name}&amp;filter=#regEx" />
+        <camel:endpoint id="fileWatcherEP_fileWatcher" uri="file://${client.solution.home}/lookup/incoming?delay=1000&amp;delete=true&amp;filter=#regEx_fileWatcher"/>
+		<camel:endpoint id="fileWatcherEP_byteFileWatcher" uri="file://${client.solution.home}/lookup/incoming?delay=1000&amp;delete=true&amp;filter=#regEx_byteFileWatcher"/>
+		<camel:endpoint id="fileWatcherEP_mqFileWatcher" uri="file://${client.solution.home}/lookup/incoming?delay=1000&amp;delete=true&amp;filter=#regEx_mqFileWatcher"/>
+        <camel:endpoint id="connectivity_InputHTTP" uri="jetty:${httplistener.url}?httpBindingRef=ugHttpBinding&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTPS" uri="jetty:${httpslistener.url}?httpBindingRef=ugHttpBinding&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTPS_REST" uri="jetty:${httpslistener_rest.url}?matchOnUriPrefix=true&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTP_REST" uri="jetty:${httplistener_rest.url}?matchOnUriPrefix=true&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTPS_JSON" uri="jetty:${httpslistener_json.url}?matchOnUriPrefix=true&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTP_JSON" uri="jetty:${httplistener_json.url}?matchOnUriPrefix=true&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTP_mng" uri="jetty:${httplistener_mgn.url}?httpBindingRef=ugHttpBinding&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+        <camel:endpoint id="connectivity_InputHTTPS_mng" uri="jetty:${httpslistener_mgn.url}?httpBindingRef=ugHttpBinding&amp;disableStreamCache=true&amp;sendServerVersion=false&amp;continuationTimeout=90000"/>
+
+        <camel:route id="fileWatcherPerf_fileWatcher">
+            <camel:from ref="fileWatcherEP_fileWatcher"/>
+            <camel:onException>
+                <camel:exception>java.lang.Exception</camel:exception>
+                <!-- If not handled, file will not be deleted - thus will be picked up again ad-infinitum -->
+                <camel:handled><camel:constant>true</camel:constant></camel:handled>
+                <!-- To see stacktrace, uncomment the line below + configure logging appender for Camel -->
+                <!-- <camel:to uri="log:org.apache.camel.component.file?level=ERROR&amp;showCaughtException=true&amp;showStackTrace=true"/> -->
+            </camel:onException>
+            <camel:to uri="bean:fileAdaptor_fileWatcher"/>
+            <camel:to uri="bean:groovyScript_PostDoBatchCallDA" />
+        </camel:route>
+
+        
+          <camel:route id="fileWatcherPerf_byteFileWatcher">
+            <camel:from ref="fileWatcherEP_byteFileWatcher"/>
+            <camel:onException>
+                <camel:exception>java.lang.Exception</camel:exception>
+                <!-- If not handled, file will not be deleted - thus will be picked up again ad-infinitum -->
+                <camel:handled><camel:constant>true</camel:constant></camel:handled>
+                <!-- To see stacktrace, uncomment the line below + configure logging appender for Camel -->
+                <!-- <camel:to uri="log:org.apache.camel.component.file?level=ERROR&amp;showCaughtException=true&amp;showStackTrace=true"/> -->
+            </camel:onException>
+            <camel:to uri="bean:fileAdaptor_byteFileWatcher"/>
+        </camel:route>
+        
+
+		<camel:route id="fileWatcherPerf_mqFileWatcher">
+			<camel:from ref="fileWatcherEP_mqFileWatcher"/>
+			<camel:onException>
+				<camel:exception>java.lang.Exception</camel:exception>
+				<!-- If not handled, file will not be deleted - thus will be picked up again ad-infinitum -->
+				<camel:handled>
+					<camel:constant>true</camel:constant>
+				</camel:handled>
+				<!-- To see stacktrace, uncomment the line below + configure logging appender for Camel -->
+				<!-- <camel:to uri="log:org.apache.camel.component.file?level=ERROR&amp;showCaughtException=true&amp;showStackTrace=true"/> -->
+			</camel:onException>
+			<camel:to uri="bean:fullFileModeProcessor_mqFileWatcher"/>
+			<camel:to uri="bean:JBPMProcessorBean"/>
+			<camel:to uri="bean:messageExceptionHandler"/>
+		</camel:route>
+		
+                <!--
+                        Deploys IPF flow definitions.
+                        Workflows placed inside the inbox folder will be read and installed. If the installation is successful the file will be moved to the
+                        deployed folder. If there is an error the file will be moved to the error folder.
+                        All moved files will have a time stamp attached to the end of the filename.
+                -->
+        <camel:route id="deployWorkflow">
+            <camel:from ref="deployWorkFlowEP"/>
+            <camel:to uri="bean:fileProcessor"/>
+        </camel:route>
+
+        <!--
+                    Redeploy IPF flow definitions on start-up
+                    make sure that the file is read only
+
+        <camel:route id="redeployWorkflow">
+            <camel:from uri="file:../processflows/deployed?noop=true"/>
+            <camel:to uri="bean:fileProcessor"/>
+        </camel:route>-->
+
+        <camel:route id="tempFolder">
+            <camel:from ref="tempStoreFolder"/>
+            <camel:to uri="bean:storeProcessor"/>
+        </camel:route>
+
+        <!-- File watcher
+        The definition of the route below:
+        lookupDirectory     -> file:../lookup
+        period              -> delay=1000
+        storageDirectory    -> move=../storage/${file:name}
+        regex               -> filter=#regEx
+        -->
+        <camel:route>
+            <camel:from ref="lookupEP"/>
+            <camel:to uri="bean:moveProcessor" />
+        </camel:route>
+
+        <!-- To enable camel scheduler processor node, uncomment this portion
+        <camel:route>
+            <camel:from uri="quartz://myGroup/myTimer/?cron=0/10 * * * * ?"/>
+            <camel:to uri="bean:schedulerProcessor"/>
+        </camel:route>
+        -->
+
+        <!-- Compress files -->
+        <!-- uncomment this section for compression node
+        <camel:route>
+            <camel:from ref="fileToZipWatcherEP"/>
+            <camel:to uri="fileToZipProcessor"/>
+        </camel:route>
+        -->
+
+
+        <!-- Uncompress gz files-->
+        <!-- uncomment this section for compression node
+        <camel:route>
+            <camel:from ref="zipToFileWatcherEP"/>
+            <camel:to uri="zipToFileProcessor"/>
+        </camel:route>
+        -->
+
+
+                <!--
+                        transact to system hook
+                        TCP/IP to receive calls from Transact Hook
+                -->
+        
+
+<!-- Transact connect plus Listener -->
+        
+
+<!-- Service Listener -->
+        
+<!-- End -->
+
+ <!-- For ConnectivityService -->
+        <camel:route id="connectivity_Service_Flow" errorHandlerRef="noErrorHandler">
+            <camel:from uri="direct:connectivity_Service_Flow"/>
+            <camel:to uri="bean:connectivityRequestProcessor"/>
+            <camel:to uri="bean:JBPMProcessorBean"/>
+            <camel:to uri="bean:connectivityResponseProcessor"/>
+        </camel:route>
+<!-- End -->
+
+<!-- Get File -->
+        
+<!-- End -->
+
+
+<!-- 
+  <camel:route>
+    <camel:from uri="wmq:GTC_QUEUE?queueManagerName=${MQM}&amp;hostname=${MQ_HOST}&amp;port=${MQ_PORT}&amp;concurrentConsumer=1&amp;channel=${MQ_SERVER}"/>
+    <camel:process ref="wmqMessageProcessor_ListenX02XtoX02XInQueue"/>
+    <camel:to uri="bean:JBPMProcessorBean"/>
+  </camel:route>
+-->
+
+        <!-- File watcher that reads file and enters a JBPM workflow. -->
+
+<!-- Service Listener Soap-->
+        
+<!-- End -->
+
+<!-- Https Listener-->
+
+	  <camel:route id="InputHTTP">
+          <camel:from uri="ref:connectivity_InputHTTP"/>
+          <camel:to uri="bean:httpRequestProcessor-InputHTTP"/>
+          <camel:to uri="bean:groovyScript_SOAPGateway"/>
+          <camel:to uri="bean:JBPMProcessorBean"/>
+          <camel:to uri="bean:httpResponseProcessor-InputHTTP"/>
+      </camel:route>
+
+        <camel:route id="InputHTTP_Mng">
+            <camel:from uri="ref:connectivity_InputHTTP_mng"/>
+            <camel:to uri="bean:httpRequestProcessor-InputHTTP"/>
+            <camel:to uri="bean:groovyScript_ManagementGateway"/>
+            <camel:to uri="bean:JBPMProcessorBean"/>
+            <camel:to uri="bean:httpResponseProcessor-InputHTTP"/>
+        </camel:route>
+
+        <camel:route id="InputHTTPS_Mng">
+            <camel:from uri="ref:connectivity_InputHTTPS_mng"/>
+            <camel:to uri="bean:httpRequestProcessor-InputHTTPS"/>
+            <camel:to uri="bean:groovyScript_ManagementGateway"/>
+            <camel:to uri="bean:JBPMProcessorBean"/>
+            <camel:to uri="bean:httpResponseProcessor-InputHTTPS"/>
+        </camel:route>
+      
+      <camel:route id="InputHTTP_REST">
+          <camel:from uri="ref:connectivity_InputHTTP_REST"/>
+          <camel:to uri="bean:httpRequestProcessor-InputHTTP"/>
+          <camel:to uri="bean:groovyScript_RESTGateway"/>
+          <camel:to uri="bean:JBPMProcessorBean"/>
+          <camel:to uri="bean:groovyScript_RESTResponse"/>
+          <camel:to uri="bean:httpResponseProcessor-InputHTTP"/>
+      </camel:route>
+
+        <camel:route id="InputHTTP_JSON">
+            <camel:from uri="ref:connectivity_InputHTTP_JSON"/>
+            <camel:to uri="bean:httpRequestProcessor-InputHTTP"/>
+            <camel:to uri="bean:groovyScript_JSONGateway"/>
+            <camel:to uri="bean:JBPMProcessorBean"/>
+            <camel:to uri="bean:httpResponseProcessor-InputHTTP"/>
+        </camel:route>
+
+      <camel:route id="InputHTTPS">
+          <camel:from uri="ref:connectivity_InputHTTPS"/>
+          <camel:to uri="bean:httpRequestProcessor-InputHTTPS"/>
+          <camel:to uri="bean:groovyScript_SOAPGateway"/>
+          <camel:to uri="bean:JBPMProcessorBean"/>
+          <camel:to uri="bean:httpResponseProcessor-InputHTTPS"/>
+      </camel:route>
+
+      <camel:route id="InputHTTPS_REST">
+          <camel:from uri="ref:connectivity_InputHTTPS_REST"/>
+          <camel:to uri="bean:httpRequestProcessor-InputHTTPS"/>
+          <camel:to uri="bean:groovyScript_RESTGateway"/>
+          <camel:to uri="bean:JBPMProcessorBean"/>
+          <camel:to uri="bean:groovyScript_RESTResponse"/>
+          <camel:to uri="bean:httpResponseProcessor-InputHTTPS"/>
+      </camel:route>
+
+
+
+
+
+        <camel:route id="InputHTTPS_JSON">
+            <camel:from uri="ref:connectivity_InputHTTPS_JSON"/>
+            <camel:to uri="bean:httpRequestProcessor-InputHTTPS"/>
+            <camel:to uri="bean:groovyScript_JSONGateway"/>
+            <camel:to uri="bean:JBPMProcessorBean"/>
+            <camel:to uri="bean:httpResponseProcessor-InputHTTPS"/>
+        </camel:route>
+
+<!-- End -->
+
+<!-- Interface Pack -->
+    
+<!-- End -->
+
+    </camel:camelContext>
+</beans>

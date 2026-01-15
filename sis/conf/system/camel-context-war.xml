@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- this config file without LDAP and MQ settings -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://activemq.apache.org/camel/schema/spring http://activemq.apache.org/camel/schema/spring/camel-spring.xsd">
+
+    <!-- no need to import other context.xml file, it will be include in WEB.xml -->
+
+    <camel:camelContext id="camelContext">
+        <camel:route id="deployWorkflow">
+            <camel:from uri="file:webapps/interfacebroker-distro-0.15.13-SNAPSHOT-app/WEB-INF/client_solution/processflows/input?delay=1000&amp;move=../deployed/${date:now:yyyyMMddHHmmssSSS}-${file:name}&amp;moveFailed=../error/${date:now:yyyyMMddHHmmssSSS}-${file:name}"/>
+            <camel:to uri="bean:fileProcessor"/>
+        </camel:route>
+
+        <!-- Redeploy IPF flow definitions on start-up make sure that the file is read only -->
+        <camel:route id="redeployWorkflow">
+            <camel:from uri="file:webapps/interfacebroker-distro-0.15.13-SNAPSHOT-app/WEB-INF/client_solution/processflows/deployed?delay=1000&amp;noop=true"/>
+            <camel:to uri="bean:fileProcessor"/>
+        </camel:route>
+
+        <!--
+                ug webservice
+        -->
+        <camel:route id="UGSOAPService">
+            <camel:from uri="cxf:bean:ugServiceHTTPEndpoint"/>
+            <camel:threads poolSize="2" waitForTaskToComplete="IfReplyExpected">
+                <camel:to uri="bean:ugRequestTransformer"/>
+                <camel:to uri="bean:JBPMProcessorBean"/>
+                <camel:to uri="bean:ugResponseTransformer"/>
+            </camel:threads>
+        </camel:route>
+		
+		<camel:route id="TransactHookService">
+            <camel:from uri="cxf:bean:transactHookServiceHTTPEndpoint"/>
+            <camel:threads poolSize="7" waitForTaskToComplete="IfReplyExpected">
+                <camel:to uri="bean:transactHookPreProcessor"/>
+                <camel:to uri="bean:JBPMProcessorBean"/>
+                <camel:to uri="bean:transactHookPostProcessor"/>
+            </camel:threads>
+        </camel:route>
+
+        <camel:route id="TestCamelSOAPService">
+            <camel:from uri="cxf:bean:testCamelServiceHTTPEndpoint"/>
+            <camel:onException>
+                <camel:exception>java.lang.Exception</camel:exception>
+                <camel:handled><camel:constant>true</camel:constant></camel:handled>
+                <camel:to uri="bean:ugResponseTransformer"/>
+            </camel:onException>
+            <camel:threads poolSize="7" waitForTaskToComplete="IfReplyExpected">
+                <camel:to uri="bean:ugRequestTransformer"/>
+                <camel:to uri="bean:workTransitionFlowBean"/>
+                <camel:to uri="bean:ugResponseTransformer"/>
+            </camel:threads>
+        </camel:route>
+
+		<!-- Class ugHttpBinding has been remove due to minimum configuration changes -->
+        <!--camel:route id="httpRPC">
+            <camel:from uri="war:///rpc/?httpBindingRef=ugHttpBinding" />
+            <camel:to uri="bean:validateHttpProcessor" />
+            <camel:choice>
+                <camel:when>
+                    <camel:groovy>exchange.in.getBody() instanceof com.experian.eda.enterprise.core.api.Message</camel:groovy>
+                    <camel:to uri="bean:httpResponseProcessor" />
+                </camel:when>
+                <camel:otherwise>
+                    <camel:to uri="bean:httpRequestProcessor" />
+                    <camel:to uri="bean:JBPMProcessorBean" />
+                    <camel:to uri="bean:httpResponseProcessor" />
+                </camel:otherwise>
+            </camel:choice>
+        </camel:route-->
+
+    </camel:camelContext>
+</beans>

@@ -1,0 +1,390 @@
+ El volumen de la unidad C es OS
+ El n£mero de serie del volumen es: ECEA-5CE3
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\3rdparties
+
+26/05/2016  12:53            62.983 activation-1.1.jar
+26/05/2016  12:53           443.432 antlr-2.7.6.jar
+26/05/2016  12:53             4.467 aopalliance-1.0.jar
+26/05/2016  12:53            43.581 asm-3.3.1.jar
+26/05/2016  12:53           114.989 aspectjrt-1.5.3.jar
+26/05/2016  12:53         1.887.781 aspectjweaver-1.5.3.jar
+26/05/2016  12:53            31.191 axis-jaxrpc-1.4.jar
+26/05/2016  12:53            18.979 axis-saaj-1.4.jar
+26/05/2016  12:53           515.920 bcel-5.1.jar
+26/05/2016  12:53         1.388.522 bndlib-2.1.0.jar
+26/05/2016  12:53           610.790 c3p0-0.9.1.2.jar
+26/05/2016  12:53            29.996 cal10n-api-0.7.4.jar
+26/05/2016  12:53         2.806.650 camel-core-2.14.3.jar
+26/05/2016  12:53            23.640 camel-csv-2.14.3.jar
+26/05/2016  12:53           213.599 camel-cxf-2.14.3.jar
+26/05/2016  12:53            65.646 camel-cxf-transport-2.14.3.jar
+26/05/2016  12:53            31.990 camel-flatpack-2.14.3.jar
+26/05/2016  12:53            76.849 camel-http-2.14.3.jar
+26/05/2016  12:53            62.491 camel-jetty-2.14.3.jar
+26/05/2016  12:53           146.617 camel-jms-2.14.3.jar
+26/05/2016  12:53            20.331 camel-ldap-2.14.3.jar
+26/05/2016  12:53            47.792 camel-mina-2.14.3.jar
+26/05/2016  12:53            50.770 camel-quartz-2.14.3.jar
+26/05/2016  12:53            35.483 camel-script-2.14.3.jar
+26/05/2016  12:53            31.536 camel-servlet-2.14.3.jar
+26/05/2016  12:53           257.947 camel-spring-2.14.3.jar
+26/05/2016  12:53            22.560 camel-velocity-2.14.3.jar
+26/05/2016  12:53        11.158.858 com.experian.eda.openam-clientsdk-12.0.2.jar
+26/05/2016  12:53            43.580 com.experian.eda.soap-builder-1.0.0.jar
+26/05/2016  12:53            21.236 com.experian.eda.soap-common-1.0.0.jar
+26/05/2016  12:53           101.110 com.experian.eda.soap-legacy-1.0.0.jar
+26/05/2016  12:53         1.495.302 com.experian.eda.wsrf-xbeans-1.0.jar
+26/05/2016  12:53            48.930 com.springsource.javax.validation-1.0.0.GA.jar
+26/05/2016  12:53            87.583 com.springsource.net.sf.ezmorph-1.0.5.jar
+26/05/2016  12:53           146.040 com.springsource.net.sf.json-2.2.2.jar
+26/05/2016  12:53         1.614.166 com.springsource.org.apache.axis-1.4.0.jar
+26/05/2016  12:53           314.490 com.springsource.org.dom4j-1.6.1.jar
+26/05/2016  12:53           231.320 commons-beanutils-1.8.0.jar
+26/05/2016  12:53            73.098 commons-codec-1.5.jar
+26/05/2016  12:53           588.337 commons-collections-3.2.2.jar
+26/05/2016  12:53           107.631 commons-dbcp-1.2.1.jar
+26/05/2016  12:53            71.442 commons-discovery-0.2.jar
+26/05/2016  12:53           305.001 commons-httpclient-3.1.jar
+26/05/2016  12:53           185.140 commons-io-2.4.jar
+26/05/2016  12:53           261.809 commons-lang-2.4.jar
+26/05/2016  12:53           315.805 commons-lang3-3.1.jar
+26/05/2016  12:53           197.067 commons-net-2.0.jar
+26/05/2016  12:53            62.086 commons-pool-1.3.jar
+26/05/2016  12:53         1.336.063 cxf-core-3.0.4.jar
+26/05/2016  12:53           174.432 cxf-rt-bindings-soap-3.0.4.jar
+26/05/2016  12:53            37.884 cxf-rt-bindings-xml-3.0.4.jar
+26/05/2016  12:53           103.317 cxf-rt-databinding-jaxb-3.0.4.jar
+26/05/2016  12:53            36.441 cxf-rt-features-clustering-3.0.4.jar
+26/05/2016  12:53           590.046 cxf-rt-frontend-jaxrs-3.0.4.jar
+26/05/2016  12:53           342.829 cxf-rt-frontend-jaxws-3.0.4.jar
+26/05/2016  12:53            99.173 cxf-rt-frontend-simple-3.0.4.jar
+26/05/2016  12:53           151.800 cxf-rt-rs-client-3.0.4.jar
+26/05/2016  12:53            67.219 cxf-rt-rs-security-oauth-3.0.4.jar
+26/05/2016  12:53           322.923 cxf-rt-transports-http-3.0.4.jar
+26/05/2016  12:53            95.641 cxf-rt-transports-http-jetty-3.0.4.jar
+26/05/2016  12:53            75.264 cxf-rt-ws-addr-3.0.4.jar
+26/05/2016  12:53           212.724 cxf-rt-ws-policy-3.0.4.jar
+26/05/2016  12:53           171.675 cxf-rt-wsdl-3.0.4.jar
+15/03/2017  10:08         3.343.752 deployr-adaptor-1.1.1.1.jar
+26/05/2016  12:53         2.623.509 derby-10.6.1.0.jar
+26/05/2016  12:53           313.898 dom4j-1.6.1.jar
+26/05/2016  12:53            50.583 ejb3-persistence-1.0.2.GA.jar
+26/05/2016  12:53           293.863 FastInfoset-1.2.12.jar
+26/05/2016  12:53            84.946 flatpack-3.4.2.jar
+26/05/2016  12:53           924.269 freemarker-2.3.18.jar
+26/05/2016  12:53            32.359 geronimo-jms_1.1_spec-1.1.1.jar
+26/05/2016  12:53         6.998.724 groovy-all-2.4.4.jar
+26/05/2016  12:53         2.225.441 guava-16.0.jar
+26/05/2016  12:53         1.675.184 guava-osgi-11.0.1.jar
+26/05/2016  12:53           279.714 hibernate-annotations-3.4.0.GA.jar
+26/05/2016  12:53            66.993 hibernate-commons-annotations-3.1.0.GA.jar
+26/05/2016  12:53         2.275.530 hibernate-core-3.3.1.GA.jar
+26/05/2016  12:53           102.661 hibernate-jpa-2.0-api-1.0.1.Final.jar
+29/12/2016  11:26           162.655 http-builder-0.6.jar
+26/05/2016  12:53           592.008 httpclient-4.3.6.jar
+26/05/2016  12:53           282.793 httpcore-4.3.3.jar
+26/05/2016  12:53            23.188 istack-commons-runtime-2.16.jar
+26/05/2016  12:53           383.546 janino-2.4.3.jar
+26/05/2016  12:53           471.005 javassist-3.4.GA.jar
+26/05/2016  12:53            26.366 javax.annotation-api-1.2.jar
+26/05/2016  12:53           200.387 javax.servlet-3.0.0.v201112011016.jar
+26/05/2016  12:53           112.210 javax.ws.rs-api-2.0-m15.jar
+26/05/2016  12:53            89.967 jaxb-api-2.1.jar
+26/05/2016  12:53           221.747 jaxb-core-2.2.7.jar
+26/05/2016  12:53           919.968 jaxb-impl-2.2.7.jar
+26/05/2016  12:53           124.212 jboss-serialization-1.0.3.GA.jar
+26/05/2016  12:53           844.482 jbpm-4.0.jar
+26/05/2016  12:53            17.308 jcl-over-slf4j-1.6.4.jar
+26/05/2016  12:53            69.246 jcr-2.0.jar
+26/05/2016  12:53           151.304 jdom-1.1.3.jar
+26/05/2016  12:53            89.511 jetty-client-8.1.17.v20150415.jar
+26/05/2016  12:53            21.163 jetty-continuation-8.1.17.v20150415.jar
+26/05/2016  12:53            96.309 jetty-http-8.1.17.v20150415.jar
+26/05/2016  12:53           106.036 jetty-io-8.1.17.v20150415.jar
+26/05/2016  12:53            24.804 jetty-jmx-8.1.17.v20150415.jar
+26/05/2016  12:53            89.944 jetty-security-8.1.17.v20150415.jar
+26/05/2016  12:53           360.093 jetty-server-8.1.17.v20150415.jar
+26/05/2016  12:53           101.790 jetty-servlet-8.1.17.v20150415.jar
+26/05/2016  12:53            96.062 jetty-servlets-8.1.17.v20150415.jar
+26/05/2016  12:53           287.808 jetty-util-8.1.17.v20150415.jar
+26/05/2016  12:53           443.153 jibx-bind-1.2.5.jar
+26/05/2016  12:53           139.116 jibx-run-1.2.5.jar
+26/05/2016  12:53           570.478 joda-time-2.1.jar
+26/05/2016  12:53            49.672 jsr173_api-1.0.jar
+26/05/2016  12:53            33.015 jsr305-1.3.9.jar
+26/05/2016  12:53            15.071 jta-1.1.jar
+26/05/2016  12:53           120.699 juel-2.1.0.jar
+26/05/2016  12:53           499.068 jxl-2.4.2.jar
+26/05/2016  12:53           442.805 kryo-2.22.jar
+26/05/2016  12:53            22.251 log-bridge-osgi-1.0.jar
+26/05/2016  12:53            20.639 log4j-over-slf4j-1.6.4.jar
+26/05/2016  12:53           246.709 logback-classic-1.0.0.jar
+26/05/2016  12:53           327.911 logback-core-1.0.0.jar
+26/05/2016  12:53           434.923 mail-1.4.2.jar
+26/05/2016  12:53           232.023 mailapi-1.4.2.jar
+26/05/2016  12:53           315.583 mina-core-1.1.7.jar
+26/05/2016  12:53            71.487 neethi-3.0.3.jar
+29/12/2016  11:29           124.106 nekohtml-1.9.16.jar
+26/05/2016  12:53            44.209 oauth-20100527.jar
+26/05/2016  12:53            11.744 oauth-provider-20100527.jar
+26/05/2016  12:53            16.763 opencsv-2.1.jar
+26/05/2016  12:53            28.767 org.apache.servicemix.bundles.commons-csv-1.0-r706899_5.jar
+26/05/2016  12:53           131.783 org.apache.servicemix.bundles.jasypt-1.9.2_1.jar
+26/05/2016  12:53           347.548 org.apache.servicemix.bundles.spring-aop-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           622.878 org.apache.servicemix.bundles.spring-beans-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           885.057 org.apache.servicemix.bundles.spring-context-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           133.990 org.apache.servicemix.bundles.spring-context-support-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           899.663 org.apache.servicemix.bundles.spring-core-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           204.149 org.apache.servicemix.bundles.spring-expression-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           415.029 org.apache.servicemix.bundles.spring-jdbc-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           212.394 org.apache.servicemix.bundles.spring-jms-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           250.216 org.apache.servicemix.bundles.spring-tx-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           645.244 org.apache.servicemix.bundles.spring-web-3.2.11.RELEASE_2.jar
+26/05/2016  12:53           159.653 org.apache.servicemix.bundles.wsdl4j-1.6.2_6.jar
+26/05/2016  12:53           246.924 org.osgi.core-4.2.0.jar
+26/05/2016  12:53            52.150 persistence-api-1.0.jar
+26/05/2016  12:53           179.818 qdox-1.12.1.jar
+26/05/2016  12:53           449.135 quartz-1.8.6.jar
+26/05/2016  12:53            29.871 regexp-1.2.jar
+26/05/2016  12:53           278.281 serializer-2.7.1.jar
+26/05/2016  12:53            25.962 slf4j-api-1.6.4.jar
+26/05/2016  12:53            42.123 slf4j-ext-1.6.4.jar
+26/05/2016  12:53            23.346 stax-api-1.0-2.jar
+26/05/2016  12:53            26.514 stax-api-1.0.1.jar
+26/05/2016  12:53           161.867 stax2-api-3.1.4.jar
+26/05/2016  12:53           361.155 trove-2.1.1.jar
+26/05/2016  12:53           449.505 velocity-1.7.jar
+26/05/2016  12:53           486.013 woodstox-core-asl-4.4.1.jar
+26/05/2016  12:53           148.429 wsdl4j-1.6.2.jar
+26/05/2016  12:53         3.176.148 xalan-2.7.1.jar
+26/05/2016  12:53           194.354 xml-apis-1.3.04.jar
+26/05/2016  12:53            84.091 xml-resolver-1.2.jar
+26/05/2016  12:53         2.694.049 xmlbeans-2.4.0.jar
+26/05/2016  12:53           171.989 xmlschema-core-2.2.1.jar
+26/05/2016  12:53           119.888 xpp3-1.1.3.4.O.jar
+26/05/2016  12:53            88.894 zdecimal-3.1.jar
+             161 archivos     76.159.634 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\3rdparties\mq6
+
+18/08/2010  16:44           723.666 com.ibm.mq.commonservices.jar
+18/08/2010  16:46           356.935 com.ibm.mq.headers.jar
+18/08/2010  16:46           440.286 com.ibm.mq.jar
+18/08/2010  16:46         1.935.780 com.ibm.mq.jmqi.jar
+18/08/2010  16:46           104.492 com.ibm.mq.pcf.jar
+18/08/2010  16:46         3.267.739 com.ibm.mqjms.jar
+18/08/2010  16:45            17.978 connector.jar
+18/08/2010  16:44         2.011.835 dhbcore.jar
+18/08/2010  16:46            25.998 jms.jar
+               9 archivos      8.884.709 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\3rdparties\mq7.0.1
+
+25/09/2013  01:00           732.514 com.ibm.mq.commonservices.jar
+25/09/2013  01:00           359.664 com.ibm.mq.headers.jar
+25/09/2013  01:00           455.057 com.ibm.mq.jar
+25/09/2013  01:00         2.058.652 com.ibm.mq.jmqi.jar
+25/09/2013  01:00           105.095 com.ibm.mq.pcf.jar
+25/09/2013  01:00         3.339.112 com.ibm.mqjms.jar
+25/09/2013  01:00            17.978 connector.jar
+25/09/2013  01:00         2.011.835 dhbcore.jar
+25/09/2013  01:00            25.998 jms.jar
+               9 archivos      9.105.905 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\3rdparties\nbsm
+
+22/04/2013  16:25             2.213 logbridge-logtofile.jar
+21/03/2013  13:26           310.345 xom-1.2.6.jar
+               2 archivos        312.558 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core
+
+26/05/2016  12:53            57.467 atb-webservice-1.58.1.31.jar
+26/05/2016  12:53             5.080 builder-api-1.58.1.31.jar
+26/05/2016  12:53           110.499 com.experian.eda.osgi.marketswitch.rt-6.1.0.e.jar
+26/05/2016  12:53             5.684 common-utils-1.0.1.8.jar
+26/05/2016  12:53             3.077 Component_R_Interfaces-1.1.1.6.jar
+26/05/2016  12:53            50.076 Component_Workflow_Runtime_Engine_RMI_Interfaces-1.6.1.39.jar
+26/05/2016  12:53            10.449 connectivity-distro-1.5.1.71.jar
+26/05/2016  12:53            15.049 connectivity-service-api-1.3.1.14.jar
+26/05/2016  12:53            49.652 copy-process-1.4.1.8.jar
+26/05/2016  12:53            20.264 crypto-utils-1.4.1.8.jar
+26/05/2016  12:53         1.477.646 da-bundle-2.5.1.7.jar
+26/05/2016  12:53            46.419 da-helper-1.4.1.8.jar
+26/05/2016  12:53           120.703 ea-api-1.5.1.13.jar
+26/05/2016  12:53            56.273 ea-solution-1.5.1.13.jar
+26/05/2016  12:53            44.697 enterprise-atb-1.58.1.31.jar
+26/05/2016  12:53            21.129 enterprise-authentication-1.58.1.31.jar
+26/05/2016  12:53            18.226 enterprise-bootstrap.jar
+26/05/2016  12:53            14.518 enterprise-builder-template-1.58.1.31.jar
+26/05/2016  12:53            94.427 enterprise-business-process-adaptor-1.58.1.31.jar
+26/05/2016  12:53            33.532 enterprise-connectivity-service-1.58.1.31.jar
+26/05/2016  12:53           119.543 enterprise-core-1.58.1.31.jar
+26/05/2016  12:53            14.176 enterprise-createfile-1.58.1.31.jar
+26/05/2016  12:53            62.175 enterprise-da-1.58.1.31.jar
+26/05/2016  12:53             7.188 enterprise-file-1.58.1.31.jar
+26/05/2016  12:53             4.861 enterprise-filereader-1.58.1.31.jar
+26/05/2016  12:53             9.144 enterprise-filter-1.58.1.31.jar
+26/05/2016  12:53            20.610 enterprise-ftp-1.58.1.31.jar
+26/05/2016  12:53            37.586 enterprise-http-1.58.1.31.jar
+26/05/2016  12:53            13.027 enterprise-ibcrypto-1.58.1.31.jar
+26/05/2016  12:53            79.660 enterprise-ibdm-1.58.1.31.jar
+26/05/2016  12:53            59.066 enterprise-ibdm-schema-1.3.1.14-bundle.jar
+26/05/2016  12:53            54.869 enterprise-interface-pack-1.58.1.31.jar
+26/05/2016  12:53            57.994 enterprise-ipf-1.58.1.31.jar
+26/05/2016  12:53            63.804 enterprise-jdbc-1.58.1.31.jar
+26/05/2016  12:53            36.739 enterprise-jms-1.58.1.31.jar
+26/05/2016  12:53             9.472 enterprise-ldap-1.58.1.31.jar
+26/05/2016  12:53             6.981 enterprise-main-1.58.1.31.jar
+26/05/2016  12:53           106.279 enterprise-mq-1.58.1.31.jar
+26/05/2016  12:53            25.979 enterprise-parser-xml-1.58.1.31.jar
+26/05/2016  12:53            10.124 enterprise-properties-1.58.1.31.jar
+26/05/2016  12:53            10.014 enterprise-rds-1.58.1.31.jar
+26/05/2016  12:53            20.637 enterprise-rds-helper-1.58.1.31.jar
+26/05/2016  12:53             7.764 enterprise-scheduler-1.58.1.31.jar
+26/05/2016  12:53            43.944 enterprise-script-1.58.1.31.jar
+26/05/2016  12:53            18.320 enterprise-sort-1.58.1.31.jar
+26/05/2016  12:53            30.724 enterprise-template-1.58.1.31.jar
+26/05/2016  12:53            57.019 enterprise-transact-connectplus-1.58.1.31.jar
+26/05/2016  12:53            34.911 enterprise-transact-hook-1.58.1.31.jar
+26/05/2016  12:53            10.938 enterprise-transacthook-service-1.58.1.31.jar
+26/05/2016  12:53            48.215 enterprise-transactv50-1.58.1.31.jar
+26/05/2016  12:53            30.529 enterprise-ug-service-1.58.1.31.jar
+26/05/2016  12:53            42.715 enterprise-utils-1.58.1.31.jar
+26/05/2016  12:53            30.554 enterprise-web-service-1.58.1.31.jar
+26/05/2016  12:53            19.323 enterprise-wsdl-utilities-1.3.1.14.jar
+26/05/2016  12:53            12.218 enterprise-xslt-1.58.1.31.jar
+26/05/2016  12:53            23.925 enterprise-zip-1.58.1.31.jar
+26/05/2016  12:53           240.920 Framework_Common_Interfaces-1.10.1.20.jar
+26/05/2016  12:53             7.616 Framework_Common_Model_Persistence-1.6.1.39.jar
+26/05/2016  12:53            24.131 Framework_Error_Handling_Interface-1.10.1.20.jar
+26/05/2016  12:53            11.213 Framework_Runtime_Audit_Service_Interfaces-1.6.1.39.jar
+26/05/2016  12:53            10.440 Framework_Security_Http_Remoting-1.6.1.39.jar
+26/05/2016  12:53            45.232 Framework_Security_Interfaces-1.6.1.39.jar
+26/05/2016  12:53             7.107 Framework_Security_Internal_Authentication_Provider-1.6.1.39.jar
+26/05/2016  12:53           102.648 Framework_Security_Model_Business-1.6.1.39.jar
+26/05/2016  12:53            75.107 Framework_Security_OpenAM_Authentication_Provider-1.6.1.39.jar
+26/05/2016  12:53            24.093 Framework_Security_Service_Interfaces-1.6.1.39.jar
+26/05/2016  12:53             2.346 Framework_Service_Interface-1.10.1.20.jar
+26/05/2016  12:53            57.491 Framework_Storage_Interfaces-1.10.1.20.jar
+26/05/2016  12:53            20.584 id-management-api-1.0.1.8.jar
+07/11/2016  10:43            18.966 iHData.jar
+26/05/2016  12:53            54.503 jbpm-extension-1.58.1.31.jar
+26/05/2016  12:53           421.690 jtsdkv52-SP6-RC2.jar
+26/05/2016  12:53            11.039 log4j-over-slf4j-patch-1.1.jar
+26/05/2016  12:53           105.384 marketswitch.rt-6.1.0.c.jar
+26/05/2016  12:53             5.293 parser-api-1.58.1.31.jar
+26/05/2016  12:53            62.281 rds-api-1.6.1.13.jar
+26/05/2016  12:53             7.901 security-utils-1.2.1.5.jar
+26/05/2016  12:53             6.405 service-context-1.4.1.8.jar
+07/02/2017  12:34            54.975 SISBureauCaller-1.0-SNAPSHOT.jar
+26/05/2016  12:53             5.634 slf4j-logbridge-1.4.1.8.jar
+              80 archivos      4.878.893 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\1.4.2
+
+29/09/2015  12:18             2.932 DA_Bean-1.4.0-SP2.jar
+29/09/2015  12:18           765.687 DA_Core-1.4.0-SP2.jar
+29/09/2015  12:18             9.224 DA_Resource-1.4.0-SP2.jar
+29/09/2015  12:18             8.554 DA_S390-1.4.0-SP2.jar
+29/09/2015  12:18             5.774 DA_Win-1.4.0-SP2.jar
+               5 archivos        792.171 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.1.0
+
+17/01/2011  10:53         1.191.704 DA-2.1.0-base.jar
+               1 archivos      1.191.704 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.2.0
+
+07/10/2013  15:41         1.245.838 DA-2.2.0-HFB.jar
+               1 archivos      1.245.838 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.2.1
+
+07/10/2013  15:42         1.300.445 DA-2.2.1-HFB.jar
+               1 archivos      1.300.445 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.2.3
+
+27/09/2013  11:44         1.248.926 DA-2.2.3-HFB.jar
+               1 archivos      1.248.926 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.2.4
+
+30/09/2014  03:56         1.247.808 DA-2.2.4-HFB.jar
+               1 archivos      1.247.808 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.2.5
+
+05/12/2014  12:27         1.282.090 DA-2.2.5-HFB.jar
+               1 archivos      1.282.090 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.3.0
+
+31/07/2015  09:54         1.339.437 DA-2.3.0-HFA.jar
+               1 archivos      1.339.437 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.4.0
+
+03/09/2015  06:54         1.461.628 DA-2.4.0-base.jar
+               1 archivos      1.461.628 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\core\DA\2.5.0
+
+19/04/2016  02:57           610.790 c3p0-0.9.1.2.jar
+19/04/2016  02:57            62.050 commons-logging-1.1.3.jar
+26/05/2016  11:51         1.494.176 DA-2.5.0.jar
+26/05/2016  11:51         1.494.176 DA.jar
+26/05/2016  11:51           103.735 DASS.jar
+26/05/2016  11:52            24.660 DA_console.jar
+26/05/2016  11:52             5.908 DA_console_WS.jar
+26/05/2016  11:52            87.867 DA_GUI_console.jar
+26/05/2016  11:52           116.224 DA_harness.jar
+19/04/2016  02:57           264.037 FastInfoset-1.0.2.jar
+19/04/2016  02:57            33.527 jackson-annotations-2.0.5.jar
+19/04/2016  02:57           195.893 jackson-core-2.0.5.jar
+19/04/2016  02:57           850.009 jackson-databind-2.0.5.jar
+19/04/2016  02:57            28.492 jaxrpc-api-1.1.jar
+19/04/2016  02:57         2.125.743 jaxrpc-impl-1.1.3_01.jar
+19/04/2016  02:57           488.686 jcommon-1.0.16.jar
+19/04/2016  02:57           151.304 jdom-1.1.3.jar
+19/04/2016  02:57         1.425.742 jfreechart-1.0.13.jar
+19/04/2016  02:57            21.571 log-bridge-1.0.jar
+19/04/2016  02:57           367.444 log4j-1.2.14.jar
+19/04/2016  02:57           434.923 mail-1.4.2.jar
+19/04/2016  02:57           105.384 marketswitch.rt-6.1.0.c.jar
+19/04/2016  02:57           278.293 saaj-impl-1.3.1.jar
+19/04/2016  02:57            25.962 slf4j-api-1.6.4.jar
+19/04/2016  02:57             9.748 slf4j-log4j12-1.6.4.jar_
+              25 archivos     10.806.344 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\crypto\3rdparties
+
+26/03/2016  01:38         1.388.522 bndlib-2.1.0.jar
+26/03/2016  01:38            58.160 commons-codec-1.4.jar
+26/03/2016  01:38           185.140 commons-io-2.4.jar
+26/03/2016  01:38           246.924 org.osgi.core-4.2.0.jar
+               4 archivos      1.878.746 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\crypto\3rdparties\core
+
+26/05/2016  11:51             3.177 crypto-manager-2.3.1.14.jar
+26/05/2016  11:51            20.264 crypto-utils-1.4.1.8.jar
+26/05/2016  11:51             7.901 security-utils-1.2.1.5.jar
+               3 archivos         31.342 bytes
+
+ Directorio de C:\PSG\Internal\SIS\SIS_v2.6\lib\crypto\core
+
+29/09/2015  11:00             3.164 crypto-manager-2.2.jar
+26/05/2016  11:51             3.177 crypto-manager-2.3.1.14.jar
+29/09/2015  11:00            19.749 crypto-utils-1.3.0.jar
+26/05/2016  11:51            20.264 crypto-utils-1.4.1.8.jar
+29/09/2015  11:00             7.897 security-utils-1.1.jar
+26/05/2016  11:51             7.901 security-utils-1.2.1.5.jar
+               6 archivos         62.152 bytes
+
+     Total de archivos en la lista:
+             312 archivos    123.230.330 bytes
+               0 dirs  361.311.256.576 bytes libres

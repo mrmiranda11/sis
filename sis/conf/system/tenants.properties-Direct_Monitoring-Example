@@ -1,0 +1,114 @@
+# tenants properties
+route1.login=alpha
+route1.password=alpha
+route1.tenantid=AlphaBureau
+route1.url=http://localhost:8080/alphaBureau.jsp
+route1.serviceid=ibas
+
+
+#####################################
+#									#
+#  Direct Monitoring Properties		#
+#									#
+#####################################
+
+##### Example 1
+################
+
+ULFULLPR.MONITORING=YES
+ULFULLPR.CSVPATH=C:\\SIS\\output\\UL
+ULFULLPR.DELIMITER=|
+ULFULLPR.PERIOD=DAILY
+
+# List of CSV Output files
+ULFULLPR.TABLES=APPLICATION,APPLICATION_DECISION_SETTER,APPLICATION_REASON_CODE,APPLICATION_SCORECARD,APPLICATION_SCORECARD_RESULTS,APPLICATION_DERIVED_DATA,APPLICATION_DERIVED_DATA_COL
+
+# Additional Column in all CSV
+ULFULLPR.AdditionalColumns=0
+
+##### Last Decision Category and reason code
+ULFULLPR.lastdecision=DEC2CCMAIN.DecisionText
+ULFULLPR.lastreasoncode=DEC2CCMAIN.DecisionCategory
+########################################
+
+#####  ScoreCard 
+ULFULLPR.ScoreCards=5
+# scorecard ID; Scorecard Name; Scorecard Score;ScoreCard Results fields, tablesize;loop index, column name 
+ULFULLPR.scorecard1=SCORING1RES.ScorecardId;SCORING1RES.ScorecardName;SCORING1RES.Score;SCORING1RES.ScoringResultsTable,50;2,SCORING1RES.Type
+ULFULLPR.scorecard2=SCORING2RES.ScorecardId;SCORING2RES.ScorecardName;SCORING2RES.Score;SCORING2RES.ScoringResultsTable,50;2,SCORING2RES.Type
+ULFULLPR.scorecard3=SCORING3RES.ScorecardId;SCORING3RES.ScorecardName;SCORING3RES.Score;SCORING3RES.ScoringResultsTable,50;2,SCORING3RES.Type
+ULFULLPR.scorecard4=SCORING4RES.ScorecardId;SCORING4RES.ScorecardName;SCORING4RES.Score;SCORING4RES.ScoringResultsTable,50;2,SCORING4RES.Type
+ULFULLPR.scorecard5=SCORING5RES.ScorecardId;SCORING5RES.ScorecardName;SCORING5RES.Score;SCORING5RES.ScoringResultsTable,50;2,SCORING5RES.Type
+########################################
+
+#####  Decision Setter
+ULFULLPR.Decisions=9
+# Decision Category; Decision Table, tablesize; Reason Code Table, tablesize; loop index, column name
+ULFULLPR.decision1=DEC1GEN2RES.DecisionCategory;DEC1GEN2RES.SortedDecisionTable,50;DEC1GEN2RES.SortedReasonCodeTable,50;2,DEC1GEN2RES.Type
+ULFULLPR.decision2=DEC1POLICYRES.DecisionCategory;DEC1POLICYRES.SortedDecisionTable,50;DEC1POLICYRES.SortedReasonCodeTable,50;2,DEC1POLICYRES.Type
+ULFULLPR.decision3=DEC1SCORERES.DecisionCategory;DEC1SCORERES.SortedDecisionTable,50;DEC1SCORERES.SortedReasonCodeTable,50;2,DEC1SCORERES.Type
+ULFULLPR.decision4=DEC2CCMAIN.DecisionCategory;DEC2CCMAIN.SortedDecisionTable,50;DEC2CCMAIN.SortedReasonCodeTable,50;0,DEC2CCMAIN.Type
+ULFULLPR.decision5=DEC2CCSUPP.DecisionCategory;DEC2CCSUPP.SortedDecisionTable,50;DEC2CCSUPP.SortedReasonCodeTable,50;2,DEC2CCSUPP.Type
+ULFULLPR.decision6=DEC2CPJOINT.DecisionCategory;DEC2CPJOINT.SortedDecisionTable,50;DEC2CPJOINT.SortedReasonCodeTable,50;0,DEC2CPJOINT.Type
+ULFULLPR.decision7=DEC2CPMAIN.DecisionCategory;DEC2CPMAIN.SortedDecisionTable,50;DEC2CPMAIN.SortedReasonCodeTable,50;0,DEC2CPMAIN.Type
+ULFULLPR.decision8=DEC3HIGHLIGHTSRES.DecisionCategory;DEC3HIGHLIGHTSRES.SortedDecisionTable,50;DEC3HIGHLIGHTSRES.SortedReasonCodeTable,50;4,DEC3HIGHLIGHTSRES.Type
+ULFULLPR.decision9=DEC3STPRES.DecisionCategory;DEC3STPRES.SortedDecisionTable,50;DEC3STPRES.SortedReasonCodeTable,50;4,DEC3STPRES.Type
+########################################
+
+#####  Derived Data
+ULFULLPR.DerivedDatas=2
+# DA variable shortname; DA variable full logical name; Database column name; Database type; length; Scale
+ULFULLPR.deriveddata1=LIMIT.LIMITFINALLIMITCC;UL-Output.LIMIT.Final Limit CC;FINAL_LIMIT_CC;Decimal;15;2
+ULFULLPR.deriveddata2=LIMIT.LIMITFINALLIMITCP;UL-Output.LIMIT.Final Limit CP;FINAL_LIMIT_CP;Decimal;15;2
+########################################
+
+
+
+##### Example 2
+################
+
+ALFULLPR.MONITORING=YES
+ALFULLPR.CSVPATH=C:\\SIS\\output\\AL
+ALFULLPR.DELIMITER=,
+ALFULLPR.PERIOD=MONTHLY
+
+# List of CSV Output files
+ALFULLPR.TABLES=APPLICATION,APPLICATION_DECISION_SETTER,APPLICATION_REASON_CODE,APPLICATION_DERIVED_DATA
+
+
+##### Last Decision Category
+ALFULLPR.lastdecision=DEC2CCMAIN.DecisionText
+ALFULLPR.lastreasoncode=DEC2CCMAIN.DecisionCategory
+########################################
+
+#####  Decision Setter
+ALFULLPR.Decisions=2
+# Decision Category; Decision Table, tablesize; Reason Code Table, tablesize; loop index, column name
+ALFULLPR.decision1=DEC1GEN2RES.DecisionCategory;DEC1GEN2RES.SortedDecisionTable,50;DEC1GEN2RES.SortedReasonCodeTable,50;2,DEC1GEN2RES.Type
+ALFULLPR.decision2=DEC1POLICYRES.DecisionCategory;DEC1POLICYRES.SortedDecisionTable,50;DEC1POLICYRES.SortedReasonCodeTable,50;2,DEC1POLICYRES.Type
+########################################
+
+#####  Derived Data
+ALFULLPR.DerivedDatas=2
+# DA variable shortname; DA variable full logical name; Database column name; Database type; length; Scale
+ALFULLPR.deriveddata1=LIMIT.LIMITFINALLIMITCC;UL-Output.LIMIT.Final Limit CC;FINAL_LIMIT_CC;Decimal;15;2
+ALFULLPR.deriveddata2=LIMIT.LIMITFINALLIMITCP;UL-Output.LIMIT.Final Limit CP;FINAL_LIMIT_CP;Decimal;15;2
+########################################
+
+
+
+
+
+
+
+
+
+
+
+#####################################
+#									#
+#  ETL Pentaho Properties			#
+#									#
+#####################################
+
+# settings example available in file "tenants.properties-ETL-Example

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<process name="callDA" key="callDA" xsi:schemaLocation="http://jbpm.org/4.0/jpdl ../conf/jpdl-4.0.xsd" xmlns="http://jbpm.org/4.0/jpdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <start name="Start">
+        <transition to="InputHTTP"/>
+    </start>
+    <custom expr="#{preBeanActivity}" name="InputHTTP">
+        <transition to="ValidateInputMessage" name="success"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_ValidateInputMessage}" name="ValidateInputMessage">
+        <transition to="PreCallDA" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_PreCallDA}" name="PreCallDA">
+        <transition to="Call_DA" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_DoCallDA}" name="Call_DA">
+        <transition to="MonitoringJunction" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{scriptRoutingActivity}" name="MonitoringJunction">
+        <transition to="errorBundleHandler" name="error"/>
+        <transition to="DA_Result_TO_CSV" name="yes"/>
+        <transition to="BuildResponseMessage" name="no"/>
+        <property name="params">
+            <string value="groovyScript=utilities/script/com/experian/MonitoringJunction.groovy"/>
+        </property>
+    </custom>
+    <custom expr="#{groovyScriptActivity_DaResultToCSV}" name="DA_Result_TO_CSV">
+        <transition to="BuildResponseMessage" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_BuildResponseMessage}" name="BuildResponseMessage">
+        <transition to="PostCallDA" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_PostCallDA}" name="PostCallDA">
+        <transition to="End" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <state name="End"/>
+    <custom expr="#{errorBundleHandler}" name="errorBundleHandler">
+        <transition to="End"/>
+        <property name="params">
+            <string value="errorMessage_key=error.message| destinationErrorCode_key=error.destination| errorCode_key=error.code| cpfId=callDA| errorParam_key=error.param"/>
+        </property>
+    </custom>
+</process>

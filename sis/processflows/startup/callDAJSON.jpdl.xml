@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<process name="callDAJSON" key="callDAJSON" xsi:schemaLocation="http://jbpm.org/4.0/jpdl ../conf/jpdl-4.0.xsd" xmlns="http://jbpm.org/4.0/jpdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <start name="Start">
+        <transition to="InputHTTP"/>
+    </start>
+    <custom expr="#{preBeanActivity}" name="InputHTTP">
+        <transition to="DoCallDAJSON" name="success"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_DoCallDAJSON}" name="DoCallDAJSON">
+        <transition to="End" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <state name="End"/>
+    <custom expr="#{errorBundleHandler}" name="errorBundleHandler">
+        <transition to="End"/>
+        <property name="params">
+            <string value="errorMessage_key=error.message| destinationErrorCode_key=error.destination| errorCode_key=error.code| cpfId=callDA| errorParam_key=error.param"/>
+        </property>
+    </custom>
+</process>

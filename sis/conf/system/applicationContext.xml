@@ -1,0 +1,1310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- this config file consist of all the Beans -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:httpj="http://cxf.apache.org/transports/http-jetty/configuration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+       http://cxf.apache.org/transports/http-jetty/configuration http://cxf.apache.org/schemas/configuration/http-jetty.xsd
+       http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+
+    <context:annotation-config/>
+
+    <!-- To customize Camel's default thread pool profile (this bean is automatically detected by Camel) -->
+    <bean class="org.apache.camel.spi.ThreadPoolProfile">
+        <property name="id" value="defaultThreadPoolProfile"/>
+        <property name="defaultProfile" value="true"/>
+        <property name="poolSize" value="${threads.default.poolSize:10}"/>
+        <property name="keepAliveTime" value="${threads.default.keepAliveTime:60}"/>
+        <property name="maxPoolSize" value="${threads.default.maxPoolSize:20}"/>
+        <property name="maxQueueSize" value="${threads.default.maxQueueSize:1000}"/>
+        <!--
+            Options available for rejectedPolicy
+                - Abort
+                - CallerRuns
+                - Discard
+                - DiscardOldest
+        -->
+        <property name="rejectedPolicy" value="${threads.default.rejectedPolicy:CallerRuns}"/>
+    </bean>
+
+    <!-- IBDO Factory to be injected into Buffer Parser and InterfaceBrokerServiceImpl. -->
+    <util:constant id="ibdoFactory" static-field="com.experian.eda.enterprise.ibdm.map.IbDataObjectMapFactory.INSTANCE"/>
+
+    <bean id="loginServiceProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl" value="${login.service.protocol}://${login.service.server.name}:${login.service.port}${login.service.path.to.service}"/>
+        <property name="serviceInterface" value="com.experian.eda.framework.security.service.interfaces.ILoginService"/>
+        <property name="httpInvokerRequestExecutor" ref="loginServiceHttpComponentsHttpInvokerRequestExecutor"/>
+    </bean>
+
+    <bean id="loginServiceHttpComponentsHttpInvokerRequestExecutor" class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor">
+        <property name="httpClient" ref="loginServiceHttpClient"/>
+    </bean>
+
+    <bean id="loginServiceHttpClientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+        <property name="defaultMaxPerRoute" value="${login.service.max.total.connections}" />
+        <property name="maxTotal" value="${login.service.max.total.connections}" />
+    </bean>
+
+    <bean id="loginServiceRequestConfigBuilder" class="org.apache.http.client.config.RequestConfig" factory-method="custom">
+        <property name="connectTimeout" value="${login.service.connection.timeout}" />
+        <property name="socketTimeout" value="${login.service.socket.timeout}" />
+    </bean>
+
+    <bean id="loginServiceRequestConfig" factory-method="build" factory-bean="loginServiceRequestConfigBuilder"/>
+
+    <bean id="loginServiceHttpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder" factory-method="create">
+        <property name="defaultRequestConfig" ref="loginServiceRequestConfig" />
+        <property name="connectionManager" ref="loginServiceHttpClientConnectionManager" />
+    </bean>
+
+    <bean id="loginServiceHttpClient" factory-method="build" factory-bean="loginServiceHttpClientBuilder"/>
+
+    <bean id="openAmAuthenticator" class="com.experian.eda.enterprise.authentication.DefaultAuthenticator">
+        <constructor-arg>
+            <bean class="com.experian.eda.security.openam.auth.OpenAMAuthenticationService" depends-on="amRestServiceWithURL"/>
+        </constructor-arg>
+    </bean>
+	<bean id="amRestService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.experian.eda.security.openam.restclient.AMRESTService"/>
+		<property name="targetMethod" value="getInstance"/>
+    </bean>
+	<bean id="amRestServiceWithURL" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean" depends-on="propertyConfigurer,amRestService">
+        <property name="targetObject" ref="amRestService" />
+        <property name="targetMethod" value="initialize"/>
+        <property name="arguments" value="${openam.authentication.url}"/>
+    </bean>
+
+    <bean id="internalAuthenticator" class="com.experian.eda.enterprise.authentication.DefaultAuthenticator">
+        <constructor-arg>
+            <bean class="com.experian.eda.framework.security.internal.auth.InternalAuthenticationService">
+                <property name="loginService" ref="loginServiceProxy"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.experian.eda.enterprise.authentication.AuthenticatorRegistry"/>
+        <property name="targetMethod" value="setDefaultAuthenticator"/>
+        <property name="arguments" ref="internalAuthenticator"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.experian.eda.enterprise.authentication.AuthenticatorRegistry"/>
+        <property name="targetMethod" value="setAuthenticatorMap"/>
+        <property name="arguments">
+            <map>
+                <entry key="Internal" value-ref="internalAuthenticator"/>
+                <entry key="OpenAM" value-ref="openAmAuthenticator"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="ipService_ibStorageProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl" value="${rds.ib.storage.protocol}://${rds.ib.storage.server.name}:${rds.ib.storage.port}/remoting/rds-persist"/>
+        <property name="serviceInterface" value="com.experian.eda.rds.api.RdsService"/>
+        <property name="httpInvokerRequestExecutor" ref="ipServiceHttpComponentsHttpInvokerRequestExecutor"/>
+    </bean>
+
+    <bean id="ipServiceHttpComponentsHttpInvokerRequestExecutor" class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor">
+        <property name="httpClient" ref="ipServiceHttpClient"/>
+    </bean>
+
+    <bean id="ipServiceHttpClientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+    	<property name="defaultMaxPerRoute" value="${rds.ib.storage.max.total.connections}"/>
+	<property name="maxTotal" value="${rds.ib.storage.max.total.connections}"/>
+    </bean>
+
+    <bean id="ipServiceRequestConfigBuilder" class="org.apache.http.client.config.RequestConfig" factory-method="custom">
+        <property name="connectTimeout" value="${rds.ib.storage.connection.timeout}" />
+        <property name="socketTimeout" value="${rds.ib.storage.socket.timeout}" />
+    </bean>
+
+    <bean id="ipServiceRequestConfig" factory-method="build" factory-bean="ipServiceRequestConfigBuilder"/>
+
+    <bean id="ipServiceHttpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder" factory-method="create">
+        <property name="defaultRequestConfig" ref="ipServiceRequestConfig" />
+        <property name="connectionManager" ref="ipServiceHttpClientConnectionManager" />
+    </bean>
+
+	<bean id="ipServiceHttpClient" factory-method="build" factory-bean="ipServiceHttpClientBuilder"/>
+    <!-- 'No error handler' reference used in camel sub routes so that error can be passed back to parent route. -->
+    <bean id="noErrorHandler" class="org.apache.camel.builder.NoErrorHandlerBuilder"/>
+
+    <bean id="camelRouter" class="com.experian.eda.enterprise.core.router.CamelRouter"/>
+
+    <bean id="lightSecurityTokenContext" class="com.experian.eda.framework.security.internal.ThreadLocalSecurityTokenContext"/>
+
+	<bean id="endPointInterceptor" class="com.experian.eda.enterprise.core.camel.processor.EndPointInterceptor"/>
+
+    <!-- lazy-init=true since the solution may not have any Connectivity listener, so this will not be used and should not 'wake up' -->
+    <bean id="connectivityRequestProcessor" class="com.experian.eda.enterprise.connectivity.camel.processor.ConnectivityRequestProcessor" lazy-init="true"/>
+
+    <!-- lazy-init=true since the solution may not have any Connectivity listener, so this will not be used and should not 'wake up' -->
+    <bean id="connectivityResponseProcessor" class="com.experian.eda.enterprise.connectivity.camel.processor.ConnectivityResponseProcessor" lazy-init="true">
+        <constructor-arg>
+            <bean class="com.experian.eda.enterprise.connectivity.converter.GroovyAwareDataTypeConverter">
+                <constructor-arg>
+                    <bean class="com.experian.eda.enterprise.connectivity.converter.ConnectivityDataTypeConverter"/>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!-- To delete this bean definition by end of sprint 13 if not required. -->
+    <bean id="systemproperty" class="com.experian.eda.enterprise.core.SystemPropertyInitializingBean">
+        <property name="systemProperties">
+            <map>
+                <entry key="atb.authentication.subcode" value="${atb.authentication.subcode}"/>
+                <entry key="atb.authentication.password" value="${atb.authentication.password}"/>
+                <entry key="javax.net.ssl.keyStore" value="${ibm.keyStore.file}"/>
+                <entry key="javax.net.ssl.trustStore" value="${ibm.trustStore.file}"/>
+                <entry key="javax.net.ssl.keyStorePassword" value="${ibm.keyStore.password}"/>
+                <entry key="javax.net.ssl.trustStorePassword" value="${ibm.trustStore.password}"/>
+                <entry key="org.eclipse.jetty.ssl.password" value="${jetty.ssl.password}"/>
+                <entry key="org.eclipse.jetty.ssl.keypassword" value="${jetty.keyStore.password}"/>
+                <entry key="org.eclipse.jetty.ssl.keystore" value="${jetty.keyStore.file}"/>
+                
+                <entry key="da.log.level" value="${da.log.level}"/>
+                <entry key="da.forceInitStrategies" value="${da.forceInitStrategies}"/>
+                <entry key="da.monitoring.area" value="${da.monitoring.area}"/>
+                <entry key="alias.translation" value="${alias.translation}"/>
+                <entry key="field.separator" value="${field.separator}"/>
+                <entry key="authentication.method" value="${authentication.method}"/>
+                <entry key="authentication.keyfile" value="${authentication.keyfile}"/>
+                <entry key="wsdl.host.tag" value="${wsdl.host.tag}"/>
+                <entry key="validation" value="${validation}"/>
+                <!--entry key="mq.encoding" value="${mq.encoding}"/-->
+                <entry key="jmx.active" value="${jmx.active}"/>
+                
+                <entry key="mandatory.additionalfields" value="${mandatory.additionalfields}"/>
+                <entry key="optional.additionalfields" value="${optional.additionalfields}"/>
+                <entry key="applicationIdHeaderField" value="${applicationIdHeaderField}"/>
+                
+                <!--entry key="mq.resQueue" value="${mq.resQueue}"/>
+                <entry key="mq.resQueueMng" value="${mq.resQueueMng}"/-->
+                
+                <entry key="autodeploy" value="${autodeploy}"/>
+				
+				<entry key="MQ.replyQueueName" value="${MQ.replyQueueName}"/>
+				<entry key="MQ.hostName" value="${MQ.hostName}"/>
+				<entry key="MQ.channel" value="${MQ.channel}"/>
+				<entry key="MQ.port" value="${MQ.port}"/>
+				<entry key="MQ.inQueueName" value="${MQ.inQueueName}"/>				
+            </map>
+        </property>
+
+ <!-- To uncomment if using WMQ to initialize connection pool tokens. -->
+
+ </bean>
+        <bean id="namingStrategy" class="com.experian.eda.enterprise.core.utils.jmx.DefaultManagementNamingStrategy">
+        <property name="token" value="myapp"/>
+        <property name="suffix" value="true"/>
+        </bean>
+    <bean id="namingStrategyFactory" class="com.experian.eda.enterprise.core.utils.jmx.ManagementNamingStrategyFactory" factory-method="getInstance">
+        <property name="managementNamingStrategy" ref="namingStrategy"/>
+    </bean>
+
+
+    <!-- JBPM configuration -->
+    <bean id="jbpmConfiguration" class="org.jbpm.pvm.internal.cfg.SpringConfiguration">
+        <constructor-arg value="my.jbpm.cfg.xml" />
+    </bean>
+
+    <bean id="ipfInitializer" class="com.experian.eda.enterprise.ipf.IpfWrapper" init-method="initSpringConfig" >
+        <property name="springConfig" ref="jbpmConfiguration"/>
+        <property name="processInstanceCmdFactory" ref="newInstanceCmdFactory"/>
+        <!--property name="processInstanceCmdFactory" ref="pooledInstanceCmdFactory"/-->
+    </bean>
+
+    <bean id="newInstanceCmdFactory" class="com.experian.eda.enterprise.jbpm.extension.NewProcessInstanceCmdFactory"/>
+
+    <bean id="pooledInstanceCmdFactory" class="com.experian.eda.enterprise.jbpm.extension.PooledProcessInstanceCmdFactory">
+        <property name="objectPool" ref="pooledInstanceObjectPool"/>
+    </bean>
+
+    <bean id="pooledInstanceObjectPool" class="com.experian.eda.enterprise.jbpm.extension.ProcessInstanceKeyedObjectPool">
+        <!--property name="maxIdle" value="5"/-->
+        <property name="maxActive" value="2"/>
+    </bean>
+
+    <bean id="jbpmExecutor" class="com.experian.eda.enterprise.ipf.ClientApiExecutor"/>
+
+    <!-- ANA-22100: depends-on errorBundleManager because when startup failed, the error message can be retrieved. -->
+    <bean id="startupProcessFlows" class="com.experian.eda.enterprise.ipf.StartupProcessFlowLoader" init-method="load" depends-on="fileResolver,errorBundleManager" >
+        <property name="fileExtension" value="jpdl.xml"/>
+        <property name="filePath" value="processflows/startup"/>
+    </bean>
+
+    <bean id="messageExceptionHandler" class="com.experian.eda.enterprise.ipf.camel.processor.MessageExceptionHandler"/>
+
+    <bean id="JBPMProcessorBean" class="com.experian.eda.enterprise.ipf.camel.processor.JBPMProcessorBean">
+        <property name="jbpmExecutor" ref="jbpmExecutor"/>
+    </bean>
+
+    <bean id="xmlTransmutator" class="com.experian.eda.enterprise.core.utils.XMLTransmutator"/>
+
+
+    <!-- inputProcessor used by ATB, DA, Transact and others -->
+    <bean id="inputProcessor" class="com.experian.eda.enterprise.core.camel.processor.Preprocessor">
+        <property name="transmutator" ref="xmlTransmutator"/>
+        <property name="requestKey" value="input.processor.request"/>
+        <property name="transmutatedDataKey" value="xml.document"/>
+    </bean>
+
+    <bean id="outputProcessor" class="com.experian.eda.enterprise.core.camel.processor.Postprocessor">
+        <!-- tally with connectivity process flow error message key properties -->
+        <property name="responseKey" value="error.message"/>
+        <property name="resourceBundleManager" ref="errorBundleManager"/>
+        <!-- tally with connectivity process flow destination error code key properties -->
+        <property name="returnCodeKey" value="error.destination"/>
+    </bean>
+
+    <bean id="springErrorBundleManager" class="com.experian.eda.enterprise.core.utils.springframework.SpringResourceBundleManager" init-method="init">
+            <property name="location" value="${app.dir}/conf/system/"/>
+        <property name="resourceName" value="errorCode"/>
+    </bean>
+
+    <bean id="errorBundleManager" class="com.experian.eda.enterprise.core.utils.ResourceBundleManagerImpl" factory-method="getInstance">
+        <property name="bundleManager" ref="springErrorBundleManager"/>
+    </bean>
+
+    <bean id="fileProcessor" class="com.experian.eda.enterprise.ipf.camel.processor.ProcessFlowFileProcessor">
+        <property name="fileExtension" value= "jpdl.xml"/>
+    </bean>
+
+    <bean id="ibdmProcessor" class="com.experian.eda.enterprise.ibdm.processor.IbdmFileProcessor" init-method="load" depends-on="fileResolver">
+        <property name="fileExtension" value= "xml"/>
+        <property name="filePath" value="utilities/schema"/>
+    </bean>
+
+    <!--File reader-->
+    <bean id="fixedFormat" class="org.apache.camel.dataformat.flatpack.FlatpackDataFormat">
+        <property name="definition" value="conf/PEOPLE-HeaderAndTrailer.pzmap.xml"/>
+        <property name="fixed" value="true"/>
+        <property name="ignoreFirstRecord" value="true"/>
+    </bean>
+
+    <bean id="delimitedFormat" class="org.apache.camel.dataformat.flatpack.FlatpackDataFormat">
+        <property name="definition" value="conf/delimited.pzmap.xml"/>
+        <property name="delimiter" value=","/>
+        <property name="ignoreFirstRecord" value="false"/>
+    </bean>
+
+    <bean id="fileReaderProcessor" class="com.experian.eda.enterprise.filereader.camel.processor.FileReaderProcessor">
+        <property name="dataKey" value="recordKey"/>
+        <property name="processFlowId" value="file_reader3"/>
+    </bean>
+
+    <bean id="regEx" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*xml$</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="moveProcessor" class="com.experian.eda.enterprise.file.camel.processor.MoveProcessor">
+        <property name="dataKey" value="data.key"/>
+    </bean>
+
+    
+
+    
+
+    <bean id="ibByteCodecFactory" class="com.experian.eda.enterprise.transact.camel.IbCodecFactory"/>
+
+    <!--<bean id="velocityPreprocessor" class="com.experian.eda.enterprise.core.camel.processor.VelocityPreprocessor"/>-->
+
+    <bean id="httpRequestProcessor" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory"/>
+    <bean id="httpResponseProcessor" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory"/>
+    <bean id="ugHttpBinding" class="com.experian.eda.enterprise.core.camel.processor.HttpBinding"/>
+    <bean id="springRmiHttpBinding" class="com.experian.eda.enterprise.core.camel.processor.SpringRmiHttpBinding"/>
+	<bean id="customHttpHeaderFilterBinding" class="com.experian.eda.enterprise.core.camel.processor.CustomHttpHeaderFilterBinding"/>
+
+    <bean id="nullTransmutator" class="com.experian.eda.enterprise.core.utils.NullTransmutator"/>
+
+    <!-- Get File -->
+    
+    <!-- End Get File -->
+
+   
+
+    <!-- To enable camel scheduler processor node, uncomment this portion
+    <bean id="schedulerProcessor" class="com.experian.eda.enterprise.scheduler.camel.processor.SchedulerProcessor">
+        <property name="workFlowId" value="SchedulerFlow2"/>
+        <property name="jbpmExecutor" ref="jbpmExecutor"/>
+    </bean>
+    -->
+
+    <!-- Filters file by gz extention (move to enterprise-zip-context.xml) -->
+    <!--<bean id="gzfileFilter" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*gz$</value>
+            </list>
+        </property>
+    </bean>-->
+
+    <bean id="fileFilter" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*jpdl.xml$</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="serFileFilter" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*ser$</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="httpCBRequestProcessor" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="cbHttpRequestServiceFactory"/>
+    </bean>
+
+    <bean id="cbHttpRequestServiceFactory" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="paramKeyPrefix" value="cb"/>
+    </bean>
+
+    <bean id="httpCBResponseProcessor" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="cbHttpResponseServiceFactory"/>
+    </bean>
+    <bean id="cbHttpResponseServiceFactory" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory"/>
+
+    <bean id="fileClientValidatorDataService" class="com.experian.eda.enterprise.core.utils.FileClientValidatorDataService"/>
+
+    <!-- IP Validator List -->
+    
+    <!-- IP Validator List END -->
+
+    <!-- IP Validator -->
+    
+    <!-- IP Validator END -->
+
+    <!--https listener-->
+    
+    <bean id="httpRequestProcessor-InputHTTP" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTP"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTP" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTP" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTP"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTP" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+    
+    <!-- to REMOVE
+    <bean id="httpRequestProcessor-InputHTTP_REST" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTP_REST"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTP_REST" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTP_REST" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTP_REST"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTP_REST" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+    -->
+
+    <bean id="httpRequestProcessor-InputHTTPS" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTPS"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTPS" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTPS" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTPS"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTPS" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+
+    <!-- to REMOVE
+    <bean id="httpRequestProcessor-InputHTTPS_REST" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTPS_REST"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTPS_REST" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTPS_REST" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTPS_REST"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTPS_REST" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+    -->
+    <!-- to REMOVE
+    <bean id="httpRequestProcessor-InputHTTP_JSON" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTP_JSON"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTP_JSON" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTP_JSON" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTP_JSON"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTP_JSON" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+    -->
+    <!-- to REMOVE
+    <bean id="httpRequestProcessor-InputHTTPS_JSON" class="com.experian.eda.enterprise.core.camel.processor.HttpRequestProcessor">
+        <property name="serviceFactory" ref="ugHttpRequestServiceFactory-InputHTTPS_JSON"/>
+    </bean>
+    <bean id="ugHttpRequestServiceFactory-InputHTTPS_JSON" class="com.experian.eda.enterprise.ug.http.UgHttpRequestServiceFactory">
+        <property name="headerKey" value="http.request.headers"/>
+    </bean>
+    <bean id="httpResponseProcessor-InputHTTPS_JSON" class="com.experian.eda.enterprise.core.camel.processor.HttpResponseProcessor">
+        <property name="serviceFactory" ref="ugHttpResponseServiceFactory-InputHTTPS_JSON"/>
+    </bean>
+    <bean id="ugHttpResponseServiceFactory-InputHTTPS_JSON" class="com.experian.eda.enterprise.ug.http.UgHttpResponseServiceFactory">
+        <property name="headerKey" value="http.response.headers"/>
+    </bean>
+    -->
+
+
+    <!-- MQ Configuration - Start -->
+    <bean id="wmqMessageProcessor_ListenX02XtoX02XInQueue" class="com.experian.eda.enterprise.mq.component.GetMessageProcessor">
+        <property name="dataKey" value="data"/>
+        <property name="processFlow" value="MQCallDA"/>
+        <property name="headerKey" value="websphere.mq.header.key"/>
+    </bean>
+    
+
+    <bean id="MqPostAdaptor_Return_to_OutQueue" class="com.experian.eda.enterprise.interfacepack.camel.processor.ExecutorProcessor">
+	    <constructor-arg ref="websphereMqSenderActivity_Return_to_OutQueue"/>
+	    <property name="name">
+	        <util:constant static-field="com.experian.eda.enterprise.mq.ComponentNames.MQ_CLIENT"/>
+	    </property>
+    </bean>
+    
+    <bean id="websphereMqSenderActivity_Return_to_OutQueue" class="com.experian.eda.enterprise.mq.component.PostMessageActivity" scope="prototype">
+        <property name="contextFactory" ref="attrCtxFactory"/>
+        <property name="messageSenderFactory" ref="websphereMessageSenderFactory_Return_to_OutQueue"/>
+        <property name="messageKey" value="message"/>
+        <property name="dataKey" value="data"/>
+        <property name="headerKey" value="header"/>
+        <property name="params">
+            <value>
+            <![CDATA[codePage=819|encoding=273|
+            port=1414|
+            host=192.168.186.128|
+            manager=qm.experian|
+            channel=server_channel|
+            queueName=IB_QUEUE|
+            data_key=data|
+            replyToQueueManagerName=|
+            replyToQueueName=|
+            expiry=30000|
+            reportOptions=MQRO_PASS_MSG_ID, MQRO_COPY_MSG_ID_TO_CORREL_ID|
+            errorCode_key=error.code|
+            errorParam_key=error.param
+           ]]>
+            </value>
+        </property>
+    </bean>
+
+<bean id="websphereMessageSenderFactory_Return_to_OutQueue" class="com.experian.eda.enterprise.mq.component.WmqMessageSenderFactory"/>
+
+
+    <!-- MQ Configuration - End -->
+
+    <!-- create a object pool bean -->
+    <bean id="transactConnectionFactory" class="com.experian.eda.enterprise.transactv50.TransactConnectionFactory" />
+
+    <bean id="genericKeyedPool" class="org.apache.commons.pool.impl.GenericKeyedObjectPool" >
+        <constructor-arg index="0" ref="transactConnectionFactory"/>
+        <!-- state out number of instances within the pool. -->
+        <property name="maxTotal" value = "10"/>
+        <!-- state out maximum waiting time for instance in miliseconds. -->
+        <property name="maxWait" value = "2000"/>
+    </bean>
+
+    <!-- transact configuration - BEGIN -->
+    <bean id="transactServiceFactory" class="com.experian.eda.enterprise.transactv50.TransactProxyFactory">
+        <property name="keyedPool" ref = "genericKeyedPool"/>
+    </bean>
+
+    <bean id="transactActivity" class="com.experian.eda.enterprise.transactv50.storeproc.ipf.TransactActivity" scope="prototype">
+        <property name="factory" ref="transactServiceFactory"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+
+        <!-- mandatory parameters: tns, username, password, storeProcId -->
+        <!-- default value of errorCode, errorParam, input_key, result_key -->
+        <property name="params" value="
+                  data_key=data|
+                  result_key=data|
+                  storeProcExtended=false|
+                  xrdFieldId=-1|
+                  xsltVersion=0|
+                  ord=false|
+                  storeProcUnicode=false|
+                  encoding=UTF8|
+                  filepath_key=transactFilepath|
+                  filepathFlag_key=transactFilepathFlag|
+                  status_key=transactStatus|
+                  returnCode_key=returnCode|
+                  errorCode_key=errorCodeKey|
+                  errorParam_key=errorParamKey|
+                  outputData_key=outputData
+                  "/>
+    </bean>
+
+    <bean id="rdsServiceLookup" class="com.experian.eda.enterprise.rds.utils.RdsServiceLookup" factory-method="getInstance">
+        <property name="defaultRdsService" ref="ipService_ibStorageProxy"/>
+        <property name="rdsServiceProxyFactory" ref="ipService_rdsServiceProxyFactory"/>
+    </bean>
+    <bean id="ipService_rdsServiceProxyFactory" class="com.experian.eda.enterprise.rds.utils.RdsServiceProxyFactory">
+        <constructor-arg index="0" ref="ipServiceHttpClientBuilder"/>
+    </bean>
+
+    
+    <!-- SQL Query Adaptor Starts -->
+    
+    
+    <!-- SQL Query Adaptor Ends -->
+
+    <bean id="attrCtxFactory" class="com.experian.eda.enterprise.utils.attributes.AttributeContextFactory">
+        <property name="actionRegistry" ref="baseActionRegistry"/>
+        <property name="parser" ref="baseParser"/>
+    </bean>
+
+    <!--bean id="actionRegistry" class="com.experian.eda.enterprise.utils.attributes.BaseActionRegistry"/-->
+
+    <bean id="baseParser" class="com.experian.eda.enterprise.utils.attributes.BaseParser">
+        <property name="preProcessor" ref="propertyConfigurer"/>
+        <property name="actionMap">
+            <map>
+                <entry key="ENCODE" value-ref="encodeAction"/>
+                <entry key="ENC" value-ref="decryptAction_aes_128"/>
+            </map>
+        </property>
+    </bean>
+    <!-- atb configuration -->
+      <!-- Simplified configuration -->
+    <bean id="atbServiceFactory" class="com.experian.eda.enterprise.atb.ATBProxyServiceFactory">
+        <!-- Default ATB URL -->
+        <property name="atbUrl" value="${atb.web.service.url}"/>
+    </bean>
+    <bean id="atbAdaptor" class="com.experian.eda.enterprise.atb.ATBAdaptor" scope="prototype">
+        <property name="factory" ref="atbServiceFactory"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  data_key=data|
+                  result_key=data|
+                  errorCode_key=errorCode|
+                  errorParam_key=errorParam|
+                  headerOutcome_key=atbHeader
+                  "/>
+    </bean>
+    <!-- Simplified configuration -->
+
+
+    <bean id="eidMapperActivity" class="com.experian.eda.enterprise.ipf.utils.EidMapperActivity" scope="prototype">
+        <property name="dataExtractor" ref="dataExtractorToXmlMap"/>
+        <property name="metadataLoader" ref="csvFileToListOfStringArrayMetadataLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+    </bean>
+
+    <bean id="eidMapperActivity2" class="com.experian.eda.enterprise.ipf.utils.EidMapperActivity" scope="prototype">
+        <property name="dataExtractor" ref="dataExtractorToXmlMap2"/>
+        <property name="metadataLoader" ref="csvFileToListOfStringArrayMetadataLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+    </bean>
+
+    <bean id="dataExtractorToXmlMap" class="com.experian.eda.enterprise.core.eid.util.DataExtractorToXmlMap"/>
+
+    <bean id="dataExtractorToXmlMap2" class="com.experian.eda.enterprise.core.eid.util.DataExtractorToXmlMap">
+        <property name="usingDataFieldAsKeyInMap" value="true"/>
+    </bean>
+
+    <bean id="csvFileToListOfStringArrayMetadataLoader" class="com.experian.eda.enterprise.core.eid.util.CsvFileToListOfStringArrayMetadataLoader"/>
+
+    <bean id="errorBundleHandler" class="com.experian.eda.enterprise.ipf.ErrorBundleHandler" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="resourceBundleManager" ref="errorBundleManager"/>
+    </bean>
+
+    <!-- setup ActionRegistry-->
+    <bean id="encodeAction" class="com.experian.eda.enterprise.utils.action.EncodeAction"/>
+
+    <bean id="decryptAction_aes_128" class="com.experian.eda.enterprise.ibcrypto.action.DecryptAction">
+        <property name="keyManagementManager" ref="baseSymKeyManager_aes_128"/>
+    </bean>
+
+    <bean id="encryptAction_aes_128" class="com.experian.eda.enterprise.ibcrypto.action.EncryptAction">
+        <property name="keyManagementManager" ref="baseSymKeyManager_aes_128"/>
+    </bean>
+
+    <bean id="decryptAction_blowfish_128" class="com.experian.eda.enterprise.ibcrypto.action.DecryptAction">
+        <property name="keyManagementManager" ref="baseSymKeyManager_blowfish_128"/>
+        <property name="name" value="decode_bf128"/>
+    </bean>
+
+    <bean id="encryptAction_blowfish_128" class="com.experian.eda.enterprise.ibcrypto.action.EncryptAction">
+        <property name="keyManagementManager" ref="baseSymKeyManager_blowfish_128"/>
+        <property name="name" value="encode_bf128"/>
+    </bean>
+
+    <bean id="baseActionRegistry" class="com.experian.eda.enterprise.utils.action.BaseActionRegistry">
+        <property name="actions">
+            <list>
+                <ref bean="decryptAction_aes_128"/>
+                <ref bean="encryptAction_aes_128"/>
+                <ref bean="decryptAction_blowfish_128"/>
+                <ref bean="encryptAction_blowfish_128"/>
+                <ref bean="encodeAction"/>
+            </list>
+        </property>
+    </bean>
+    <!-- end setup ActionRegistry-->
+
+    <!-- start create file -->
+    <bean id="createFileNode" class="com.experian.eda.enterprise.createfile.ipf.FileCreatorNode" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  prefix=|
+                  suffix=.tmp|
+                  deleteOnExit=false|
+                  encoding=ASCII|
+                  data_key=data|
+                  result_key=data|
+                  errorCode_key=errorCode|
+                  errorParam_key=errorParam
+                  "/>
+    </bean>
+    <!-- end create file -->
+
+    <!-- start encryption -->
+    <bean id="baseSymKeyManager_aes_128" class="com.experian.eda.enterprise.ibcrypto.IBFileKeyManagementManager" depends-on="fileResolver">
+        <property name="source" value="key/AEScryptoKey.key"/>
+    </bean>
+
+    <bean id="baseSymKeyManager_blowfish_128" class="com.experian.eda.enterprise.ibcrypto.IBFileKeyManagementManager" depends-on="fileResolver">
+        <property name="source" value="key/blowfishCryptoKey.key"/>
+    </bean>
+
+    <bean id="decryptActivity" class="com.experian.eda.enterprise.ibcrypto.ipf.DecryptActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="DEC#password=fLd3jxxuX4rr0lkAKNXDeg=="/>
+    </bean>
+
+    <bean id="encryptActivity" class="com.experian.eda.enterprise.ibcrypto.ipf.EncryptActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="ENC#password=PASSWORD"/>
+    </bean>
+
+    <bean id="decryptActivity_bf128" class="com.experian.eda.enterprise.ibcrypto.ipf.DecryptActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="decode_bf128#password=PASSWORD"/>
+    </bean>
+
+    <bean id="encryptActivity_bf128" class="com.experian.eda.enterprise.ibcrypto.ipf.EncryptActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="encode_bf128#password=PASSWORD"/>
+    </bean>
+    <!-- end encryption -->
+
+     <!-- start DA configuration -->
+    <bean id="daProxyFactory" class="com.experian.eda.enterprise.da.impl.SimpleDAProxyFactory"/>
+
+    
+
+    <bean id="da_StringToDomTransmutatorActivity" class="com.experian.eda.enterprise.ipf.utils.TransmutatorActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="transmutator" ref="da_StringToDomTransmutator"/>
+    </bean>
+
+    <bean id="da_StringToDomTransmutator" class="com.experian.eda.enterprise.core.utils.StringToDomTransmutator"/>
+
+    <!-- end DA configuration -->
+
+    <!-- start FTP configuration -->
+    <bean id="ftpHelperFactory" class="com.experian.eda.enterprise.ftp.FtpHelperFactoryImpl"/>
+
+    <bean id="abstractFtpActivity" class="com.experian.eda.enterprise.ftp.ipf.AbstractFtpActivity" abstract="true">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="ftpHelperFactory" ref="ftpHelperFactory"/>
+        <property name="params" value="
+                  errorCode_key=errorCode|
+                  errorParam_key=errorParam|
+                  port=21|
+                  connectTimeout=60000
+                  "/>
+    </bean>
+
+
+    <bean id="ftpDownloadActivity" class="com.experian.eda.enterprise.ftp.ipf.FtpDownloadActivity" parent="abstractFtpActivity" scope="prototype"/>
+
+    <bean id="ftpUploadActivity" class="com.experian.eda.enterprise.ftp.ipf.FtpUploadActivity" parent="abstractFtpActivity" scope="prototype"/>
+
+    <!-- end FTP configuration -->
+
+    <!-- Start ZIP configuration -->
+
+   <bean id="compressionNode" class="com.experian.eda.enterprise.compression.common.CompressionNode" scope="prototype">
+        <property name="headerOutcomeKey" value="compressionHeader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  suffix=.tmp|
+                  zipExtension=.gz|
+                  errorCode_key=error.code|
+                  errorParam_key=error.param
+                  "/>
+    </bean>
+
+    <!-- Compress a normal file into gzip-->
+    <bean id="fileToZipProcessor" class="com.experian.eda.enterprise.compression.common.CompressionNode">
+        <property name="headerOutcomeKey" value="fileToZipHeader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  tempDir=C:/temp|
+                  bufferSize=2048|
+                  operationNum=2
+                  "/>
+    </bean>
+
+    <bean id="zipToFileProcessor" class="com.experian.eda.enterprise.compression.common.CompressionNode">
+        <property name="headerOutcomeKey" value="zipToFileHeader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  tempDir=C:/temp|
+                  bufferSize=2048|
+                  operationNum=3
+                  "/>
+    </bean>
+
+    <!-- Filter that only allow file the has extension of .gz, to be used in Uncompress file camel route. -->
+    <bean id="gzfileFilter" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*gz$</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="txtfileFilter" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*txt$</value>
+            </list>
+        </property>
+    </bean>
+    <!-- end ZIP configuration -->
+
+    <!-- BEGIN - preBeanActivity -->
+    <!-- fix for ANA-37132 -->
+    <bean id="preBeanActivity" name="doNothingActivity" class="com.experian.eda.enterprise.ipf.DoNothingActivity"/>
+    <bean id="fileScriptActivity" class="com.experian.eda.enterprise.ipf.PreBeanActivity" scope="prototype"/>
+
+
+    <!-- Begin HttpActivity & HttpByAuthenticationActivity -->
+    <bean id="httpActivity" class="com.experian.eda.enterprise.http.ipf.HttpActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="metricsService" ref="metricsService"/>
+        <property name="params" value="
+                  errorCode_key=error.code|
+                  errorParam_key=error.param
+                  "/>
+    </bean>
+
+    <bean id="httpByAuthenticationActivity" class="com.experian.eda.enterprise.http.ipf.HttpByAuthenticationActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="metricsService" ref="metricsService"/>
+        <property name="params" value="
+                  errorCode_key=error.code|
+                  errorCode_key=error.param
+                  "/>
+    </bean>
+    <!-- End HttpActivity & HttpAuthenticationActivity -->
+
+    <!-- BEGIN XsltNode -->
+    <bean id="xsltNode" class="com.experian.eda.enterprise.xslt.XSLTNode" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  errorCode_key=errorCode|
+                  errorParam_key=errorParam|
+                  headerOutcome_key=xsltHeader|
+                  result_key=data
+                  "/>
+    </bean>
+    <!-- END XsltNode -->
+
+    <!-- XMLValidator -->
+    <!-- xmlFilePathValidator -->
+    <bean id="xmlFilePathValidator" class="com.experian.eda.enterprise.ipf.utils.XmlFilePathValidatorActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  errorCode_key=xmlValidatorFlow1.error.code.key|
+                  errorParam_key=xmlValidatorFlow1.error.param.key
+                  "/>
+    </bean>
+    <!-- END xmlFilePathValidator -->
+
+    <!-- xmlFileValidator -->
+    <bean id="xmlFileValidator" class="com.experian.eda.enterprise.ipf.utils.XmlFileValidatorActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  xmlFile_key=xmlFileKey|
+                  errorCode_key=xmlValidatorFlow1.error.code.key|
+                  errorParam_key=xmlValidatorFlow1.error.param.key
+                  "/>
+    </bean>
+    <!-- END xmlFileValidator -->
+
+    <!-- END xmlStringValidator -->
+    <bean id="xmlStringValidator" class="com.experian.eda.enterprise.ipf.utils.XmlStringValidatorActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+                  errorCode_key=xmlValidatorFlow1.error.code.key|
+                  errorParam_key=xmlValidatorFlow1.error.param.key
+                  "/>
+    </bean>
+    <!-- END xmlStringValidator -->
+
+    <!-- Begin String to DOM transmutator Activity classes -->
+    
+    <!-- End string to dom transmutator -->
+
+    <!-- BEGIN TemplateServiceActivity -->
+    <bean id="templateServiceActivity" class="com.experian.eda.enterprise.template.ipf.TemplateServiceActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+        templateRoot_key=root|
+        errorCode_key=errorCode|
+        errorParam_key=errorParam|
+        result_key=data
+        "/>
+    </bean>
+    <!-- END TemplateServiceActivity -->
+
+    <!-- BEGIN XmlTemplateServiceActivity -->
+    <bean id="xmlTemplateServiceActivity" class="com.experian.eda.enterprise.template.ipf.XmlTemplateServiceActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+        templateRoot_key=root|
+        errorCode_key=errorCode|
+        errorParam_key=errorParam|
+        result_key=data
+        "/>
+    </bean>
+    <!-- END XmlTemplateServiceActivity -->
+
+    <bean id="ldapSearchServiceActivity" class="com.experian.eda.enterprise.ldap.service.ipf.LDAPSearchServiceActivity" scope="prototype">
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="
+        errorCode_key=errorCodeKey|
+        errorParam_key=errorParamKey|
+        ldapBaseKey=ldap.base|
+        ldapCriteriaKey=ldap.criteria|
+        ldapScopeKey=ldap.scope
+        "/>
+    </bean>
+
+    <bean id="sorter" class="com.experian.eda.enterprise.sort.api.Sorter" scope="prototype">
+        <property name="headerOutcomeKey" value="header"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+    </bean>
+
+    <!-- FileReaderAdaptor for reading in files -->
+	<bean id="fullFileModeProcessor_mqFileWatcher" class="com.experian.eda.enterprise.ipf.camel.processor.FullFileModeProcessor">
+		<property name="dataKey" value="filewatcher.data"/>
+		<property name="processDefinitionKey" value="batchMQCallDA"/>
+		<property name="maxFileSize" value="10"/>
+	</bean>
+	<bean id="regEx_mqFileWatcher" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+		<property name="regexList">
+			<list value-type="java.lang.String">
+				<value>^.*MQ$</value>
+			</list>
+		</property>
+	</bean>
+    <bean id="delimitedFileHandler_fileWatcher" class="com.experian.eda.enterprise.jbpm.extension.filereader.DelimitedFileReaderFactory">
+        <property name="delimiter" value="\r\n"/>
+        <property name="keepDelimiter" value="False"/>
+        <property name="encoding" value="ISO-8859-1"/>
+        <property name="headerCharacterCount" value="0"/>
+        <property name="trailerCharacterCount" value="0"/>
+        <property name="headerKey" value=""/>
+        <property name="skipFirstRecord" value="true"/>
+        <property name="firstRecordKey" value="header"/>
+        <property name="skipLastRecord" value="false"/>
+    </bean>
+
+
+    <bean id="fileAdaptor_fileWatcher" class="com.experian.eda.enterprise.ipf.camel.processor.FileProcessor">
+        <property name="fileReaderProperties" ref="fileReaderProperties_fileWatcher"/>
+    </bean>
+
+    <bean id="fileReaderProperties_fileWatcher" class="com.experian.eda.enterprise.jbpm.extension.filereader.FileReaderProperties">
+        <property name="recordKeyId" value="recordId_Key"/>
+        <property name="recordKey" value="recordKey" />
+        <property name="threads" value="5" />
+        <property name="processDefinitionKey" value="batchCallDA"/>
+        <property name="abstractFileReaderFactory" ref="delimitedFileHandler_fileWatcher"/>
+    </bean>
+
+    <bean id="regEx_fileWatcher" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*txt$</value>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="delimitedFileHandler_byteFileWatcher" class="com.experian.eda.enterprise.jbpm.extension.filereader.DelimitedFileReaderFactory">
+        <property name="delimiter" value="\r\n"/>
+        <property name="keepDelimiter" value="False"/>
+        <property name="encoding" value="ISO-8859-1"/>
+        <property name="headerCharacterCount" value="0"/>
+        <property name="trailerCharacterCount" value="0"/>
+        <property name="headerKey" value=""/>
+        <property name="skipFirstRecord" value="false"/>
+        <property name="firstRecordKey" value="recordKey"/>
+        <property name="skipLastRecord" value="false"/>
+    </bean>
+
+
+    <bean id="fileAdaptor_byteFileWatcher" class="com.experian.eda.enterprise.ipf.camel.processor.FileProcessor">
+        <property name="fileReaderProperties" ref="fileReaderProperties_byteFileWatcher"/>
+    </bean>
+
+    <bean id="fileReaderProperties_byteFileWatcher" class="com.experian.eda.enterprise.jbpm.extension.filereader.FileReaderProperties">
+        <property name="recordKeyId" value="recordId_Key"/>
+        <property name="recordKey" value="recordKey" />
+        <property name="threads" value="5" />
+        <property name="processDefinitionKey" value="batchByteCallDA"/>
+        <property name="abstractFileReaderFactory" ref="delimitedFileHandler_byteFileWatcher"/>
+    </bean>
+
+    <bean id="regEx_byteFileWatcher" class="com.experian.eda.enterprise.file.camel.processor.FileFilter">
+        <property name="regexList">
+            <list value-type="java.lang.String">
+                <value>^.*dat$</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- End of FileReaderAdaptor classes for reading in files -->
+
+    <bean id="groovyClassLoader" class="groovy.lang.GroovyClassLoader"/>
+
+    <!-- IMPORTANT NOTE: Must use scope="prototype" for scriptRoutingActivity for for thread safety reasons. -->
+    <bean id="scriptRoutingActivity" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" scope="prototype">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+    </bean>
+
+    
+
+   <!-- Service Listener -->
+   
+     <bean id="connectivityService_ServiceX02XListener" class="com.experian.eda.enterprise.authentication.remoting.http.camel.SecureSpringHttpInvokerServiceExporter">
+        <constructor-arg ref="lightSecurityTokenContext"/>
+        <property name="service">
+            <bean class="com.experian.eda.enterprise.connectivity.service.DefaultConnectivityService">
+                <property name="router">
+                    <bean factory-bean="ServiceX02XListener_secureRouterFactory" factory-method="create"/>
+                </property>
+                <property name="metricsService" ref="metricsService"/>
+            </bean>
+        </property>
+        <property name="serviceInterface" value="com.experian.eda.connectivity.service.api.ConnectivityService"/>
+    </bean>
+
+    <bean id="ServiceX02XListener_secureRouterFactory" class="com.experian.eda.enterprise.authentication.router.SecureRouterFactory">
+        <constructor-arg ref="lightSecurityTokenContext"/>
+        <constructor-arg ref="camelRouter"/>
+        <property name="securityTokenKey" value="security.token"/>
+        <property name="securityTokenRequired" value="false"/>
+    </bean>
+    
+
+    <bean id="rawAndParsedDataGenerator" class="com.experian.eda.enterprise.interfacepack.rds.RawAndParsedDataGenerator"/>
+
+    <bean id="templatePdsRepository" class="com.experian.eda.enterprise.interfacepack.pds.repository.CachingTemplatePdsRepository">
+        <property name="templatePdsService" ref="templatePdsService" />
+    </bean>
+
+    <bean id="templatePdsService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl" value="${template.pds.service.protocol}://${template.pds.service.server.name}:${template.pds.service.port}${template.pds.service.path.to.service}"/>
+        <property name="serviceInterface" value="com.experian.eda.ea.api.templatepds.TemplatePdsService"/>
+        <property name="httpInvokerRequestExecutor" ref="templatePdsService_HttpComponentsHttpInvokerRequestExecutor"/>
+    </bean>
+    <bean id="templatePdsServiceHttpClientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+        <property name="defaultMaxPerRoute" value="${template.pds.service.max.total.connections}"/>
+        <property name="maxTotal" value="${template.pds.service.max.total.connections}"/>
+    </bean>
+
+    <bean id="templatePdsService_HttpComponentsHttpInvokerRequestExecutor" class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor">
+        <property name="httpClient" ref="templatePdsServiceHttpClient"/>
+    </bean>
+    
+    <bean id="templatePdsServiceHttpClient" factory-method="build" factory-bean="templatePdsServiceHttpClientBuilder"/>
+    <bean id="templatePdsServiceRequestConfig" factory-method="build" factory-bean="templatePdsServiceRequestConfigBuilder"/>
+
+    <bean id="templatePdsServiceRequestConfigBuilder" class="org.apache.http.client.config.RequestConfig" factory-method="custom">
+        <property name="connectTimeout" value="${template.pds.service.connection.timeout}" />
+        <property name="socketTimeout" value="${template.pds.service.socket.timeout}" />
+    </bean>
+
+    <bean id="templatePdsServiceHttpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder" factory-method="create">
+        <property name="defaultRequestConfig" ref="templatePdsServiceRequestConfig" />
+        <property name="connectionManager" ref="templatePdsServiceHttpClientConnectionManager" />
+    </bean>
+<!--End-->
+    
+    
+
+    <bean id="templateEngine" class="com.experian.eda.enterprise.template.engine.freemarker.FreemarkerTemplateEngine" init-method="init">
+      <property name="templateFolderPath" value="utilities/templates/"/>
+      <property name="defaultEncoding" value="UTF-8"/>
+      <property name="customMethods">
+        <list>
+          <bean class="com.experian.eda.enterprise.builder.template.method.ExceptionMethod" />
+          <bean class="com.experian.eda.enterprise.builder.template.method.ExistsMethod" />
+        </list>
+      </property>
+      <property name="macros">
+        <list>
+          <bean class="com.experian.eda.enterprise.builder.template.macro.ForEachMacro" />
+        </list>
+      </property>
+    </bean>
+
+
+
+<!--Start ServiceListenerSoap-->
+
+<!--End ServiceListenerSoap-->
+
+    <bean id="endpointRouterActivity" class="com.experian.eda.enterprise.interfacepack.ipf.EndpointRouterActivity" scope="prototype">
+        <property name="router" ref="camelRouter"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="errorCode_key=errorCode|errorParam_key=errorParam"/>
+    </bean>
+
+    <bean id="subflowActivity" class="com.experian.eda.enterprise.ipf.SubflowActivity" scope="prototype">
+        <property name="jbpmExecutor" ref="jbpmExecutor"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+    </bean>
+    <!-- Work Transition Flow -->
+    <bean id = "flowExecutionBean" class="com.experian.eda.enterprise.core.camel.processor.WorkTransitionFlowBean"/>
+
+    <bean id="groovyScriptActivity_BuildResponseMessage" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/BuildResponseMessage.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_PreCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/PreCallDA.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_PostCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/PostCallDA.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_ValidateInputMessage" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/ValidateInputMessage.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_DoCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/DoCallDA.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_DaResultToCSV" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/DaResultToCSV.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_BuildWSDL" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/BuildWSDL.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_DoBatchCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/DoBatchCallDA.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_ExecutePentahoJob" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/ExecutePentahoJob.groovy"/>
+    </bean>
+
+    <bean id="groovyScript_RESTGateway" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/RESTGateway.groovy"/>
+    </bean>
+    <bean id="groovyScript_RESTResponse" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/RESTResponse.groovy"/>
+    </bean>
+    
+    <bean id="groovyScript_SOAPGateway" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/SOAPGateway.groovy"/>
+    </bean>
+
+    <bean id="groovyScript_PostDoBatchCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/PostDoBatchCallDA.groovy"/>
+    </bean>
+
+     <bean id="groovyScriptActivity_DoBatchByteCallDA" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/DoBatchByteCallDA.groovy"/>
+    </bean>
+
+	<bean id="groovyScriptActivity_MQ_Listener" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+		<property name="classLoader" ref="groovyClassLoader"/>
+		<property name="ctxFactory" ref="attrCtxFactory"/>
+		<property name="params" value="groovyScript=utilities/script/com/experian/MQ_Listener.groovy"/>
+	</bean>
+
+    <bean id="groovyScriptActivity_GenerateJSONSchema" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/GenerateJSONSchema.groovy"/>
+    </bean>
+
+    <bean id="groovyScript_JSONGateway" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/JSONGateway.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_DoCallDAJSON" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/DoCallDAJSON.groovy"/>
+    </bean>
+
+    <bean id="groovyScript_ManagementGateway" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/ManagementGateway.groovy"/>
+    </bean>
+
+    <bean id="groovyScriptActivity_ManagementService" class="com.experian.eda.enterprise.script.groovy.GroovyScriptActivity" lazy-init="true">
+        <property name="classLoader" ref="groovyClassLoader"/>
+        <property name="ctxFactory" ref="attrCtxFactory"/>
+        <property name="params" value="groovyScript=utilities/script/com/experian/ManagementService.groovy"/>
+    </bean>
+
+
+
+ <!-- Start Open AM configuration for refresh token to work -->
+
+<bean id="healthCheckService" class="com.experian.eda.enterprise.metrics.DefaultHealthCheckService"/>
+
+    <bean id="camelContextHealthTracker" class="com.experian.eda.enterprise.metrics.CamelContextHealthTracker">
+        <constructor-arg index="0" ref="healthCheckService" />
+    </bean>
+
+    <bean id="healthCheckProcessor" class="com.experian.eda.enterprise.metrics.processor.HealthCheckProcessor">
+        <constructor-arg index="0" ref="healthCheckService" />
+    </bean>
+
+    <bean id="metricsProcessor" class="com.experian.eda.enterprise.metrics.processor.MetricsProcessor">
+        <constructor-arg index="0" ref="metricsService" />
+    </bean>
+
+   <!-- <bean id="metricsService" class="com.experian.eda.enterprise.metrics.DefaultMetricsService">
+        <constructor-arg index="0" value="true" />
+    </bean>-->
+
+	
+	 <bean id="metricsService" class="com.experian.eda.enterprise.metrics.DefaultMetricsService"  depends-on="systemproperty">
+        <constructor-arg index="0" value="${cx.metric.enabled:false}" />
+		<property name="splunkUrl" value="${cx.metric.splunk.url}"/>
+		<property name="splunkToken" value="${cx.metric.splunk.token}"/>
+		<property name="splunkInterval" value="${cx.metric.splunk.interval}"/>
+		<!--<property name="splunkIndex" value="${cx.metric.splunk.index}"/> -->
+		<property name="splunkSource" value="${cx.metric.splunk.source}"/>
+    </bean>
+		
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.experian.eda.enterprise.metrics.MetricsServiceRegistry"/>
+        <property name="targetMethod" value="setDefaultMetricsService"/>
+        <property name="arguments" ref="metricsService"/>
+    </bean>
+    <bean id="featureToggle" class="com.experian.eda.enterprise.core.FF4JToggleDelegator">
+       <constructor-arg value="conf/system/ff4j.xml"/>
+    </bean>
+
+    <bean id="configServiceToggleOn" class="com.experian.eda.enterprise.interfacepack.configservice.ConfigServiceToggle">
+        <property name="featureUid" value="UseExternalConfigData"/>
+        <property name="ff4jToggle" ref="featureToggle"/>
+        <property name="flipStrategyConditions">
+           <util:map id="featureContext">
+              <entry key="context" value="${CX_CONTEXT}"/>
+           </util:map>
+        </property>
+        <property name="needExternalCredential" value="${use.external.config}"/>
+    </bean>
+    <bean id="configDataExtractor" class="com.experian.eda.enterprise.interfacepack.configservice.ConfigDataExtractor" scope="prototype" lazy-init="true">
+        <property name="environment" value="${CX_ENV}"/>
+        <property name="queryType">
+          <bean class="java.util.AbstractMap.SimpleEntry">
+             <constructor-arg index="0" value="active"/>
+             <constructor-arg index="1" value="true"/>
+           </bean>
+        </property>
+    </bean>
+    <bean id="configServiceRequest" class="com.experian.eda.enterprise.interfacepack.configservice.RequestProcessor" scope="prototype" lazy-init="true"/>
+    <bean id="configServiceRespone" class="com.experian.eda.enterprise.interfacepack.configservice.ResponseProcessor" scope="prototype" lazy-init="true">
+       <property name="outputKey" value="${config.data.key}"/>
+    </bean>
+    <bean id="configServiceException" class="com.experian.eda.enterprise.core.exception.InterfaceBrokerSystemException">
+       <constructor-arg index="0">
+          <util:constant static-field="com.experian.eda.enterprise.interfacepack.ErrorCodeConstants.CONFIG_SERVICE_ERRORCODE"/>
+       </constructor-arg>
+       <constructor-arg index="1" value="Error calling config service"/>
+    </bean>
+</beans>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- this config file consist of all the Beans -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.0.xsd">
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+    <!-- first bean that need to be initialised -->
+    <bean id="fileResolver" class="com.experian.eda.enterprise.core.utils.springframework.FileResolver">
+        <property name="applicationHomeDir" value="/WEB-INF/client_solution"/>
+    </bean>
+
+
+    <!-- Load the properties file -->
+    <!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>-->
+    <bean id="propertyConfigurer" class="com.experian.eda.enterprise.ibcrypto.spring.properties.EncryptPropertyPlaceholderConfigurer" depends-on="fileResolver">
+        <constructor-arg index="0" ref="baseSymKeyManager_aes_128"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>/WEB-INF/client_solution/conf/system/system.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+         Endpoint to deal with UG SOAP service
+    -->
+    <cxf:cxfEndpoint id="ugServiceHTTPEndpoint" address="${ibservice.url}"
+                     serviceClass="com.scorex.osgi.oug.components.ougwebcomponent.OUGWService" />
+    <cxf:cxfEndpoint id="transactHookServiceHTTPEndpoint" address="${transacthookservice.url}"
+                     serviceClass="com.experian.eda.enterprise.transact.ws.TransactHookService" />
+    <cxf:cxfEndpoint id="testCamelServiceHTTPEndpoint" address="${camelservice.url}"
+                     serviceClass="com.scorex.osgi.oug.components.ougwebcomponent.OUGWService" />
+</beans>

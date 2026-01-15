@@ -1,0 +1,68 @@
+/* AUTOMATICALLY GENERATED ON Mon Dec 01 14:36:24 SGT 2014*/
+/* DO NOT EDIT */
+
+grant codeBase "file:${ib.home}${/}lib${/}3rdparties${/}*" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:${ib.home}${/}lib${/}core${/}enterprise-bootstrap.jar" {
+  permission java.util.PropertyPermission "*", "read, write";
+  permission java.security.SecurityPermission "getProperty.ssl.*";
+  permission java.net.SocketPermission "*", "listen, accept,resolve"; //for http listener to be able to accept connection
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+};
+
+grant codeBase "file:${ib.home}${/}lib${/}core${/}enterprise-main-1.56.jar" {
+  permission java.util.PropertyPermission "*", "read, write";
+  permission java.security.SecurityPermission "getProperty.ssl.*";
+  permission java.net.SocketPermission "*", "connect, resolve, listen, accept, resolve"; //for http listener to be able to accept connection
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+};
+
+grant codeBase "file:${ib.home}${/}lib${/}core${/}enterprise-core-1.56.jar" {
+  permission java.util.PropertyPermission "*", "read, write";
+};
+
+grant codeBase "file:${ib.home}${/}lib${/}core${/}*" {
+  permission java.util.PropertyPermission "*", "read";
+  permission java.lang.RuntimePermission "*";
+  permission javax.management.MBeanServerPermission "*";
+  permission javax.management.MBeanPermission "*", "*";
+  permission javax.management.MBeanTrustPermission "*";
+  permission java.lang.reflect.ReflectPermission "*";
+  permission java.io.FilePermission "/data/hudson/tools/hudson.model.JDK/jdk1.7.0_76/jdk1.7.0_76/jre${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf${/}system${/}", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf${/}system${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf${/}adaptor${/}", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}conf${/}adaptor${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}templates", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}templates${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}schema", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}schema${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}script", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}script${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}xslt_template", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}utilities${/}xslt_template${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}processflows${/}startup", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}processflows${/}startup${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}processflows${/}input", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}processflows${/}input${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}key${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}mapping${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}lookup", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}lookup${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}filewatcher${/}-", "read, write, delete";
+  permission java.io.FilePermission "${client.solution.home}${/}clientlib", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}clientlib${/}-", "read";
+  permission java.io.FilePermission "${ib.home}${/}lib${/}3rdparties${/}", "read";
+  permission java.io.FilePermission "${ib.home}${/}lib${/}3rdparties${/}-", "read";
+  permission java.io.FilePermission "${ib.home}${/}lib${/}core${/}", "read";
+  permission java.io.FilePermission "${ib.home}${/}lib${/}core${/}-", "read";
+  permission java.io.FilePermission "${ib.home}${/}bin", "read";
+  permission java.io.FilePermission "${ib.home}${/}bin${/}-", "read";
+  permission java.io.FilePermission "${client.solution.home}${/}logs", "read, write";
+  permission java.io.FilePermission "${client.solution.home}${/}logs${/}-", "read, write";
+};
+

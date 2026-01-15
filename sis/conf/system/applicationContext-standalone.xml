@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- this config file consist of all the Beans -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xmlns:httpj="http://cxf.apache.org/transports/http-jetty/configuration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://camel.apache.org/schema/spring ../../conf/system/camel-spring.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/transports/http-jetty/configuration http://cxf.apache.org/schemas/configuration/http-jetty.xsd
+       http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.2.0.xsd
+       http://activemq.apache.org/camel/schema/spring http://activemq.apache.org/camel/schema/spring/camel-spring.xsd">
+
+
+    <!-- first bean that need to be initialised -->
+    <bean id="fileResolver" class="com.experian.eda.enterprise.core.utils.springframework.FileResolver">
+        <property name="applicationHomeDir" value="file://${client.solution.home}/"/>
+    </bean>
+
+
+    <bean id="propertyConfigurer" class="com.experian.eda.enterprise.ibcrypto.spring.properties.EncryptPropertyPlaceholderConfigurer" depends-on="fileResolver">
+        <constructor-arg index="0" ref="baseSymKeyManager_aes_128"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="ignoreResourceNotFound" value="false"/>
+        <property name="locations">
+            <list>
+                <value>conf/system/system.properties</value>
+            </list>
+        </property>
+    </bean>
+
+	<!-- Load the tenant properties file -->
+    <bean id="configurer" class="com.experian.eda.enterprise.properties.ExposedPropertyPlaceholderConfigurer" depends-on="fileResolver">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="ignoreResourceNotFound" value="false"/>
+        <property name="locations">
+            <list>
+                <value>conf/system/tenants.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="decryptor" class="com.experian.eda.enterprise.properties.DefaultDecryptor">
+		<constructor-arg>
+            <bean factory-bean="baseSymKeyManager_aes_128" factory-method="retrieveKey"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="tenantProperties" class="com.experian.eda.enterprise.properties.DecryptingConnectivityProperties">
+        <constructor-arg>
+             <bean factory-bean="configurer" factory-method="load"/>
+        </constructor-arg>
+        <constructor-arg ref="decryptor"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.experian.eda.enterprise.properties.PropertiesRegistry"/>
+        <property name="targetMethod" value="setTenantProperties"/>
+        <property name="arguments" ref="tenantProperties"/>
+    </bean>
+	<!-- End loading the tenant properties file -->
+
+    <httpj:engine-factory bus="cxf" id="tls-settings">
+        <httpj:engine port="8092">
+            <httpj:threadingParameters minThreads="1" maxThreads="#{T(Math).max(1, T(Math).min(4,T(Runtime).getRuntime().availableProcessors()/8)) + T(Math).max(1,T(Math).min(4,T(Runtime).getRuntime().availableProcessors()/2)) + 2}" />
+        </httpj:engine>
+        <httpj:engine port="8093">
+            <httpj:threadingParameters minThreads="1" maxThreads="#{T(Math).max(1, T(Math).min(4,T(Runtime).getRuntime().availableProcessors()/8)) + T(Math).max(1,T(Math).min(4,T(Runtime).getRuntime().availableProcessors()/2)) + 2}" />
+        </httpj:engine>
+
+    </httpj:engine-factory>
+
+
+
+</beans>

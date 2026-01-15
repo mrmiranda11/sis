@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ff4j xmlns="http://www.ff4j.org/schema/ff4j" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ff4j.org/schema/ff4j http://ff4j.org/schema/ff4j-1.4.0.xsd">
+    <features>
+        <feature uid="UseExternalConfigData" enable="true" description="Get exertanl config data from config service">
+            <flipstrategy class="com.experian.eda.featuretoggle.PropertyFlipStrategy">
+                <param name="context" value="SaaS"/>
+            </flipstrategy>
+        </feature>
+    </features>
+</ff4j>
+

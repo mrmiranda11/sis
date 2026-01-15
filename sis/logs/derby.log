@@ -1,0 +1,11 @@
+----------------------------------------------------------------
+Tue Jan 13 16:18:53 COT 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-019b-b939-d111-000009b3f508 
+on database directory memory:C:\SIS_2_13\bin  with class loader java.net.URLClassLoader@2a5ca609 
+Loaded from file:/C:/SIS_2_13/lib/3rdparties/derby-10.9.1.0.jar
+java.vendor=Azul Systems, Inc.
+java.runtime.version=11.0.27+6-LTS
+user.dir=C:\SIS_2_13\bin
+derby.system.home=null
+derby.stream.error.file=C:\SIS_2_13\sis\logs\derby.log
+Database Class Loader started - derby.database.classpath=''

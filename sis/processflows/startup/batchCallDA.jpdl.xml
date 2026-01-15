@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<process name="batchCallDA" key="batchCallDA" xsi:schemaLocation="http://jbpm.org/4.0/jpdl ../conf/jpdl-4.0.xsd" xmlns="http://jbpm.org/4.0/jpdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <start name="Start">
+        <transition to="ProcessFile"/>
+    </start>
+    <custom expr="#{preBeanActivity}" name="ProcessFile">
+        <transition to="DoBatchCallDA" name="success"/>
+    </custom>
+    <custom expr="#{groovyScriptActivity_DoBatchCallDA}" name="DoBatchCallDA">
+        <transition to="MonitoringJunction" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <custom expr="#{scriptRoutingActivity}" name="MonitoringJunction">
+        <transition to="errorBundleHandler" name="error"/>
+        <transition to="DA_Result_TO_CSV" name="yes"/>
+        <transition to="End" name="no"/>
+        <property name="params">
+            <string value="groovyScript=utilities/script/com/experian/MonitoringJunction.groovy"/>
+        </property>
+    </custom>
+    <custom expr="#{groovyScriptActivity_DaResultToCSV}" name="DA_Result_TO_CSV">
+        <transition to="End" name="success"/>
+        <transition to="errorBundleHandler" name="error"/>
+    </custom>
+    <state name="End"/>
+    <custom expr="#{errorBundleHandler}" name="errorBundleHandler">
+        <transition to="End"/>
+        <property name="params">
+            <string value="errorMessage_key=error.message| destinationErrorCode_key=error.destination| errorCode_key=error.code| cpfId=batchCallDA| errorParam_key=error.param"/>
+        </property>
+    </custom>
+</process>
+

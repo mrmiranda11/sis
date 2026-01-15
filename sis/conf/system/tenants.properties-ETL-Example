@@ -1,0 +1,76 @@
+# tenants properties
+route1.login=alpha
+route1.password=alpha
+route1.tenantid=AlphaBureau
+route1.url=http://localhost:8080/alphaBureau.jsp
+route1.serviceid=ibas
+
+
+#####################################
+#									#
+#  Direct Monitoring Properties		#
+#									#
+#####################################
+
+# settings example available in file "tenants.properties-Direct.Monitoring-Example
+
+#####################################
+#									#
+#  ETL Pentaho Properties			#
+#									#
+#####################################
+
+##### Example 1
+################
+
+# ORACLE or MSSQL
+CALL1.DBTYPE=ORACLE
+CALL1.DBSERVER=localhost
+CALL1.DBNAME=ADM
+CALL1.DBPORT=1433
+CALL1.DBUSER=ADM
+CALL1.DBPASSWORD=ADM
+# CSV file type in Unix or DOS (Carriage return)
+CALL1.FILETYPE=UNIX
+CALL1.CSVPATH=C:\\SIS\\output\\UL
+CALL1.BADFILESPATH=C:\\SIS\\output\\UL\\BAD
+# Type of data storage in Database UPDATE(For PCSM and PCO) or INSERT(for PCCM)
+CALL1.SYSTEMTYPE=UPDATE
+# List of table present in Database - Exact match between CSV file and table name required 
+CALL1.TABLES=APPLICATION,APPLICATION_DECISION_SETTER,APPLICATION_REASON_CODE,APPLICATION_SCORECARD,APPLICATION_SCORECARD_RESULTS,APPLICATION_DERIVED_DATA,APPLICATION_DERIVED_DATA_COL
+CALL1.DELIMITER=|
+# Date format expected in Database 
+CALL1.DATEFORMAT=dd/MM/yyyy HH:mm:ss
+# Database loading: DAILY or MONTHLY
+CALL1.PERIOD=DAILY
+# ETL log level. WARN by default
+CALL1.LOGLEVEL=DEBUG
+################ 
+
+
+##### Example 2
+################ 
+
+# ORACLE or MSSQL
+CALL2.DBTYPE=MSSQL
+CALL2.DBSERVER=10.161.102.23
+CALL2.DBNAME=ADM
+CALL2.DBPORT=1433
+CALL2.DBUSER=ADM
+CALL2.DBPASSWORD=ADM
+# CSV file type in Unix or DOS (Carriage return)
+CALL2.FILETYPE=DOS
+CALL2.CSVPATH=C:\\SIS\\output\\UL
+CALL2.BADFILESPATH=C:\\SIS\\output\\UL\\BAD
+# Type of data storage in Database UPDATE(For PCSM and PCO) or INSERT(for PCCM)
+CALL2.SYSTEMTYPE=INSERT
+# List of table present in Database - Exact match between CSV file and table name required 
+CALL2.TABLES=APPLICATION,APPLICATION_SCORECARD
+CALL2.DELIMITER=,
+# Date format expected in Database
+CALL2.DATEFORMAT=dd/MM/yyyy HH:mm:ss
+# Database loading: DAILY or MONTHLY 
+CALL2.PERIOD=DAILY
+# ETL log level. WARN by default
+#CALL2.LOGLEVEL=DEBUG
+################

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{25} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="da-appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Da.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.experian.eda.runtime.common.da" level="ERROR" additivity="false">
+        <appender-ref ref="da-appender"/>
+    </logger>
+
+
+    <appender name="others-rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Others.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{50} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="monitoring-appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Da-Monitoring.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{50} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.experian.DaResultToCSV" level="ERROR" additivity="false">
+        <appender-ref ref="monitoring-appender"/>
+    </logger>
+
+    <!--
+        Enable JMX management. User can then find some useful operations on the MBeans panel through jconsole,
+        under "ch.qos.logback.classic.jmx.Configurator".
+
+        Reference: http://logback.qos.ch/manual/jmxConfig.html
+    -->
+    <jmxConfigurator />
+
+    <!--
+        Below rolling file appender is use to define the rolling policy based on the maximum log file size.
+
+        MinIndex - This option represents the lower bound for the file's index.
+        MaxIndex - This option represents the upper bound for the file's index.
+
+        MaxFileSize  - set the maximum limit for the size of file
+    -->
+    <!--appender name="ExperianRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>experian.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <FileNamePattern>experian.%i.log.zip</FileNamePattern>
+            <MinIndex>1</MinIndex>
+            <MaxIndex>3</MaxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>5MB</MaxFileSize>
+        </triggeringPolicy>
+
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level [%thread] %logger{10} [%file : %line] %msg%n</Pattern>
+        </layout>
+    </appender-->
+
+    <!--
+        Below rolling file appender is use to define a rollover policy based on time, say by day or by month.
+
+        For monthly rolling:
+        FileNamePattern - logFileName.%d{yyyy-MM}.log
+
+        For weekly rolling:
+        FileNamePattern - logFileName.%d{yyyy-ww}.log
+
+        For daily rolling:
+        FileNamePattern - logFileName.%d{yyyy-MM-dd}.log
+
+        For hourly rolling:
+        FileNamePattern - logFileName.%d{yyyy-MM-dd_HH}.log
+
+
+        MaxHistory - set the maximum file per time rolling approach.
+        Eg.
+        FileNamePattern - logFileName.%d{yyyy-MM}.log
+        MaxHistory - 6
+
+        Desc: we use a monthly rolling approach, and it will keep maximum up to six files(each per month)
+
+    -->
+    <appender name="system-rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/System.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{25} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="time-rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Time.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{25} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="error-rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>ACCEPT</onMatch>
+        </filter>
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Error.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{25} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="trace-rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator name="myEval">
+                <expression>message.contains("[TRACE]")</expression>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>ACCEPT</OnMatch>
+        </filter>
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${client.solution.home}/logs/Trace.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%date [%thread] %level %logger{25} - %replace(%msg){'[\r\n]+','&#10;&gt;&gt;&gt;'}%n</Pattern>
+        </encoder>
+    </appender>
+
+
+
+    <logger name="com.experian" level="DEBUG" additivity="false">
+        <appender-ref ref="error-rollingFileAppender" />
+        <appender-ref ref="system-rollingFileAppender" />
+        <appender-ref ref="trace-rollingFileAppender" />
+    </logger>
+
+
+    <logger name="com.experian.util.TimeAgent" level="INFO" additivity="false">
+        <appender-ref ref="time-rollingFileAppender" />
+    </logger>
+
+
+    <logger name="com.experian.eda.enterprise.main" level="INFO" additivity="false">
+        <appender-ref ref="error-rollingFileAppender" />
+        <appender-ref ref="system-rollingFileAppender" />
+        <appender-ref ref="trace-rollingFileAppender" />
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.experian.eda.enterprise.ipf.IpfInitializer" level="ERROR" additivity="false">
+        <appender-ref ref="error-rollingFileAppender" />
+        <appender-ref ref="system-rollingFileAppender" />
+        <appender-ref ref="trace-rollingFileAppender" />
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="ERROR">
+        <appender-ref ref="others-rollingFileAppender"/>
+    </root>
+
+</configuration>
